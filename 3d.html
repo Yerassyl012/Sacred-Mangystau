@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="kk,ru,en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Тур | Сакральные объекты Мангыстау | Immersive Explorer</title>
+    
+    <!-- Three.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/effects/StereoEffect.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/VRControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/effects/OutlineEffect.js"></script>
+    
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Advanced UI Libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #0F1E2D;
+            --secondary: #00D4AA;
+            --accent: #FF6B9D;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-dark: rgba(15, 30, 45, 0.95);
+            --neon-glow: 0 0 20px rgba(0, 212, 170, 0.5);
+            --gradient: linear-gradient(135deg, #0F1E2D 0%, #1A3A5F 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 170, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 107, 157, 0.05) 0%, transparent 50%);
+        }
+
+        /* Matrix Background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+            box-shadow: var(--neon-glow);
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .loading-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .loading-stats {
+            display: flex;
+            gap: 2rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Main Container */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            height: 100vh;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* 3D Viewer Container */
+        .viewer-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #three-container {
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            background: var(--glass-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: var(--secondary);
+            color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--neon-glow);
+        }
+
+        .control-btn.active {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+
+        /* Info Overlay */
+        .info-overlay {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: var(--glass-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: 350px;
+            z-index: 100;
+            transform: translateY(0);
+            transition: transform 0.5s;
+        }
+
+        .info-overlay.hidden {
+            transform: translateY(-120%);
+        }
+
+        .site-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .site-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--secondary);
+        }
+
+        .site-title h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .site-subtitle {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .info-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--glass);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Hotspots */
+        .hotspot {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 212, 170, 0.2);
+            border: 2px solid var(--secondary);
+            cursor: pointer;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-hotspot 2s infinite;
+            transition: all 0.3s;
+        }
+
+        .hotspot:hover {
+            background: rgba(0, 212, 170, 0.4);
+            transform: scale(1.2);
+            box-shadow: var(--neon-glow);
+        }
+
+        .hotspot i {
+            color: white;
+            font-size: 1rem;
+        }
+
+        .hotspot-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-dark);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .hotspot:hover .hotspot-tooltip {
+            opacity: 1;
+        }
+
+        @keyframes pulse-hotspot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(0, 212, 170, 0); }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--glass-dark);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .close-sidebar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-sidebar:hover {
+            background: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        /* Sites Navigator */
+        .sites-nav {
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: var(--glass);
+            border-radius: 12px;
+            padding: 0.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .site-thumb {
+            aspect-ratio: 1;
+            background: var(--glass);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-thumb:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+            box-shadow: var(--neon-glow);
+        }
+
+        .site-thumb.active {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.2), transparent);
+            border-color: var(--secondary);
+        }
+
+        .site-thumb-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .site-thumb-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .site-thumb-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Model Controls */
+        .model-controls {
+            background: var(--glass);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .controls-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .controls-title i {
+            color: var(--secondary);
+        }
+
+        .control-slider {
+            margin: 1.5rem 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .slider-fill {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            border-radius: 3px;
+        }
+
+        .slider-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: grab;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .slider-handle:active {
+            cursor: grabbing;
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .control-mode-btn {
+            padding: 0.8rem;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .control-mode-btn:hover {
+            background: rgba(0, 212, 170, 0.2);
+            border-color: var(--secondary);
+        }
+
+        .control-mode-btn.active {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+
+        /* Measurement Tool */
+        .measurement-tool {
+            background: var(--glass);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: none;
+        }
+
+        .measurement-tool.active {
+            display: block;
+        }
+
+        .measurement-result {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            text-align: center;
+            color: var(--secondary);
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        /* VR Mode Indicator */
+        .vr-indicator {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: var(--glass-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.5s;
+        }
+
+        .vr-indicator.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .vr-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tour Path */
+        .tour-path {
+            background: var(--glass);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tour-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tour-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tour-step:hover {
+            background: rgba(0, 212, 170, 0.1);
+            transform: translateX(5px);
+        }
+
+        .tour-step.active {
+            background: rgba(0, 212, 170, 0.2);
+            border-left: 3px solid var(--secondary);
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--secondary);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 100%;
+                height: 100%;
+                transform: translateX(100%);
+                transition: transform 0.5s;
+                z-index: 1000;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .toggle-sidebar {
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                width: 60px;
+                height: 60px;
+                background: var(--secondary);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: var(--primary);
+                cursor: pointer;
+                z-index: 100;
+                box-shadow: var(--neon-glow);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-overlay {
+                width: calc(100% - 4rem);
+            }
+            
+            .control-bar {
+                flex-wrap: wrap;
+                width: 90%;
+                justify-content: center;
+            }
+            
+            .sites-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Debug Stats */
+        #stats {
+            position: fixed !important;
+            left: 2rem !important;
+            bottom: 2rem !important;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Background -->
+    <div class="matrix-bg" id="matrixBg"></div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <i class="fas fa-vr-cardboard"></i>
+        </div>
+        <div class="loading-text">3D TUR BOOTING</div>
+        <div class="loading-progress">
+            <div class="loading-progress-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-stats">
+            <span id="loadingModel">Loading 3D Models...</span>
+            <span id="loadingTextures">Loading Textures...</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        <!-- 3D Viewer -->
+        <div class="viewer-container">
+            <div id="three-container"></div>
+            
+            <!-- Info Overlay -->
+            <div class="info-overlay" id="infoOverlay">
+                <div class="site-header">
+                    <div class="site-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div class="site-title">
+                        <h3 id="currentSiteName">Шопан Ата</h3>
+                        <div class="site-subtitle" id="currentSiteDesc">Подземная мечеть XIV века</div>
+                    </div>
+                </div>
+                
+                <div class="info-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="polyCount">12.4K</div>
+                        <div class="stat-label">Полигонов</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="textureSize">8.2MB</div>
+                        <div class="stat-label">Текстур</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="scaleValue">1:50</div>
+                        <div class="stat-label">Масштаб</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="lodLevel">High</div>
+                        <div class="stat-label">Качество</div>
+                    </div>
+                </div>
+                
+                <button class="control-btn" id="toggleInfo" style="width:100%;border-radius:12px;margin-top:1rem;">
+                    <i class="fas fa-chevron-up"></i> Скрыть информацию
+                </button>
+            </div>
+            
+            <!-- Control Bar -->
+            <div class="control-bar">
+                <button class="control-btn" id="rotateMode" title="Вращение">
+                    <i class="fas fa-rotate"></i>
+                </button>
+                <button class="control-btn" id="panMode" title="Перемещение">
+                    <i class="fas fa-arrows-up-down-left-right"></i>
+                </button>
+                <button class="control-btn" id="zoomMode" title="Приближение">
+                    <i class="fas fa-magnifying-glass"></i>
+                </button>
+                <button class="control-btn" id="measureMode" title="Измерение">
+                    <i class="fas fa-ruler"></i>
+                </button>
+                <button class="control-btn" id="xrayMode" title="Рентген-режим">
+                    <i class="fas fa-x-ray"></i>
+                </button>
+                <button class="control-btn" id="vrMode" title="VR режим">
+                    <i class="fas fa-vr-cardboard"></i>
+                </button>
+                <button class="control-btn" id="screenshot" title="Скриншот">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button class="control-btn" id="resetView" title="Сброс вида">
+                    <i class="fas fa-rotate-left"></i>
+                </button>
+            </div>
+            
+            <!-- Hotspots will be added dynamically -->
+            
+            <!-- VR Indicator -->
+            <div class="vr-indicator" id="vrIndicator">
+                <div class="vr-icon">
+                    <i class="fas fa-vr-cardboard"></i>
+                </div>
+                <div>
+                    <div style="font-weight:bold;">VR MODE ACTIVE</div>
+                    <div style="font-size:0.8rem;opacity:0.7;">Используйте контроллеры для навигации</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">3D ТУР КОНТРОЛЬ</h2>
+                <button class="close-sidebar" id="closeSidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Sites Navigator -->
+            <div class="sites-nav">
+                <div class="nav-tabs">
+                    <div class="nav-tab active" data-tab="objects">Объекты</div>
+                    <div class="nav-tab" data-tab="tour">Тур</div>
+                    <div class="nav-tab" data-tab="layers">Слои</div>
+                </div>
+                
+                <div class="tab-content" id="objectsTab">
+                    <div class="sites-grid" id="sitesGrid">
+                        <!-- Sites will be added dynamically -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tourTab" style="display:none;">
+                    <div class="tour-path">
+                        <h3 style="margin-bottom:1rem;">Маршрут экскурсии</h3>
+                        <div class="tour-steps" id="tourSteps">
+                            <!-- Tour steps will be added dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="layersTab" style="display:none;">
+                    <div class="model-controls">
+                        <h3 class="controls-title">
+                            <i class="fas fa-layer-group"></i>
+                            Управление слоями
+                        </h3>
+                        <div id="layersList">
+                            <!-- Layers will be added dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Model Controls -->
+            <div class="model-controls">
+                <h3 class="controls-title">
+                    <i class="fas fa-sliders"></i>
+                    Настройки модели
+                </h3>
+                
+                <div class="control-slider">
+                    <div class="slider-label">
+                        <span>Яркость</span>
+                        <span id="brightnessValue">75%</span>
+                    </div>
+                    <div class="slider-container" id="brightnessSlider">
+                        <div class="slider-fill" style="width:75%"></div>
+                        <div class="slider-handle" style="left:75%"></div>
+                    </div>
+                </div>
+                
+                <div class="control-slider">
+                    <div class="slider-label">
+                        <span>Контраст</span>
+                        <span id="contrastValue">60%</span>
+                    </div>
+                    <div class="slider-container" id="contrastSlider">
+                        <div class="slider-fill" style="width:60%"></div>
+                        <div class="slider-handle" style="left:60%"></div>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-mode-btn active" data-mode="day">
+                        <i class="fas fa-sun"></i>
+                        День
+                    </button>
+                    <button class="control-mode-btn" data-mode="night">
+                        <i class="fas fa-moon"></i>
+                        Ночь
+                    </button>
+                    <button class="control-mode-btn" data-mode="storm">
+                        <i class="fas fa-cloud-bolt"></i>
+                        Буря
+                    </button>
+                    <button class="control-mode-btn" data-mode="wireframe">
+                        <i class="fas fa-border-all"></i>
+                        Каркас
+                    </button>
+                    <button class="control-mode-btn" data-mode="textured">
+                        <i class="fas fa-paint-roller"></i>
+                        Текстуры
+                    </button>
+                    <button class="control-mode-btn" data-mode="solid">
+                        <i class="fas fa-cube"></i>
+                        Материал
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Measurement Tool -->
+            <div class="measurement-tool" id="measurementTool">
+                <h3 class="controls-title">
+                    <i class="fas fa-ruler-combined"></i>
+                    Инструмент измерений
+                </h3>
+                <div class="measurement-result" id="measurementResult">
+                    0.00 m
+                </div>
+                <div style="text-align:center;margin:1rem 0;">
+                    <button class="control-btn" id="startMeasure" style="width:auto;padding:0.8rem 2rem;border-radius:12px;">
+                        <i class="fas fa-play"></i> Начать измерение
+                    </button>
+                </div>
+                <div style="font-size:0.9rem;opacity:0.7;text-align:center;">
+                    Кликните на две точки модели для измерения расстояния
+                </div>
+            </div>
+            
+            <!-- Export Controls -->
+            <div style="margin-top:auto;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.1);">
+                <button class="control-btn" id="exportModel" style="width:100%;border-radius:12px;margin-bottom:1rem;">
+                    <i class="fas fa-download"></i> Экспорт модели
+                </button>
+                <div style="display:flex;gap:1rem;">
+                    <button class="control-btn" style="flex:1;border-radius:12px;">
+                        <i class="fas fa-question-circle"></i> Помощь
+                    </button>
+                    <button class="control-btn" style="flex:1;border-radius:12px;">
+                        <i class="fas fa-cog"></i> Настройки
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Toggle Button -->
+        <div class="toggle-sidebar" id="toggleSidebar">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+
+    <script>
+        // Three.js Variables
+        let scene, camera, renderer, controls;
+        let model = null;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let isMeasuring = false;
+        let measurePoints = [];
+        let currentSiteId = 1;
+        let isVRActive = false;
+        let vrEffect;
+        
+        // Sites Data
+        const sites = [
+            {
+                id: 1,
+                name: "Шопан Ата",
+                description: "Подземная мечеть XIV века",
+                icon: "fas fa-mosque",
+                color: "#00D4AA",
+                scale: 1.0,
+                hotspots: [
+                    {x: 100, y: 200, title: "Вход в мечеть", desc: "Главный вход в подземную мечеть"},
+                    {x: 300, y: 400, title: "Центральный зал", desc: "Основное помещение для молитв"},
+                    {x: 500, y: 300, title: "Ниша михраб", desc: "Направление на Мекку"}
+                ]
+            },
+            {
+                id: 2,
+                name: "Караман Ата",
+                description: "Мазар мудрости и справедливости",
+                icon: "fas fa-monument",
+                color: "#FF6B9D",
+                scale: 0.9,
+                hotspots: [
+                    {x: 150, y: 250, title: "Центральный мазар", desc: "Основное сооружение"},
+                    {x: 400, y: 350, title: "Резные орнаменты", desc: "Каменная резьба на стенах"}
+                ]
+            },
+            {
+                id: 3,
+                name: "Кенті Баба",
+                description: "Древнее кладбище",
+                icon: "fas fa-tombstone",
+                color: "#9D4EFF",
+                scale: 1.1,
+                hotspots: [
+                    {x: 200, y: 300, title: "Старейшие надгробия", desc: "Наиболее древние захоронения"}
+                ]
+            },
+            {
+                id: 4,
+                name: "Куйсу Там",
+                description: "Кесена в центре степи",
+                icon: "fas fa-archway",
+                color: "#4E9DFF",
+                scale: 1.0
+            },
+            {
+                id: 5,
+                name: "Бекет Ата",
+                description: "Подземная мечеть знаний",
+                icon: "fas fa-graduation-cap",
+                color: "#FFD166",
+                scale: 1.2
+            },
+            {
+                id: 6,
+                name: "Султан Еле",
+                description: "Мазар у Каспийского моря",
+                icon: "fas fa-water",
+                color: "#06D6A0",
+                scale: 0.8
+            }
+        ];
+
+        // Initialize Three.js Scene
+        function initThreeJS() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0F1E2D, 10, 100);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                alpha: true 
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            document.getElementById('three-container').appendChild(renderer.domElement);
+            
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 1;
+            controls.maxDistance = 100;
+            controls.maxPolarAngle = Math.PI;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            const hemisphereLight = new THREE.HemisphereLight(0x00D4AA, 0x0F1E2D, 0.3);
+            scene.add(hemisphereLight);
+            
+            // Grid Helper
+            const gridHelper = new THREE.GridHelper(100, 100, 0xffffff, 0xffffff);
+            gridHelper.material.opacity = 0.1;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+            
+            // Skybox
+            const skyboxGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+            const skyboxMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0F1E2D,
+                side: THREE.BackSide
+            });
+            const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+            scene.add(skybox);
+            
+            // Add test geometry (placeholder for actual models)
+            addTestModel();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Handle mouse click for measurements
+            renderer.domElement.addEventListener('click', onMouseClick);
+            
+            // Start animation loop
+            animate();
+            
+            // Simulate loading progress
+            simulateLoading();
+        }
+        
+        // Add test model (replace with actual GLTF models)
+        function addTestModel() {
+            // Create a simple test structure
+            const geometry = new THREE.BoxGeometry(5, 3, 5);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x8B7355,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            
+            model = new THREE.Mesh(geometry, material);
+            model.position.y = 1.5;
+            model.castShadow = true;
+            model.receiveShadow = true;
+            scene.add(model);
+            
+            // Add some details
+            const pillarGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4, 8);
+            for (let i = 0; i < 4; i++) {
+                const pillar = new THREE.Mesh(pillarGeometry, material);
+                pillar.position.set(
+                    (i % 2 === 0 ? 2 : -2),
+                    2,
+                    (i < 2 ? 2 : -2)
+                );
+                scene.add(pillar);
+            }
+            
+            // Add dome
+            const domeGeometry = new THREE.SphereGeometry(3, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const dome = new THREE.Mesh(domeGeometry, new THREE.MeshStandardMaterial({
+                color: 0xD4A55A,
+                roughness: 0.5
+            }));
+            dome.position.y = 4;
+            dome.scale.y = 0.5;
+            scene.add(dome);
+        }
+        
+        // Load actual GLTF model
+        function loadModel(modelUrl) {
+            const loader = new THREE.GLTFLoader();
+            
+            // Remove existing model
+            if (model) {
+                scene.remove(model);
+            }
+            
+            loader.load(modelUrl, (gltf) => {
+                model = gltf.scene;
+                model.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                scene.add(model);
+                
+                // Center and scale model
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 10 / maxDim;
+                model.scale.multiplyScalar(scale);
+                
+                model.position.sub(center.multiplyScalar(scale));
+                model.position.y = -size.y * scale / 2;
+                
+            }, (xhr) => {
+                // Progress callback
+                const percent = (xhr.loaded / xhr.total * 100).toFixed(2);
+                updateLoadingProgress('model', percent);
+            }, (error) => {
+                console.error('Error loading model:', error);
+                // Keep test model if loading fails
+            });
+        }
+        
+        // Simulate loading progress
+        function simulateLoading() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // Hide loading screen after delay
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('loadingScreen').style.display = 'none';
+                            document.getElementById('mainContainer').style.opacity = '1';
+                            initUI();
+                        }, 500);
+                    }, 500);
+                }
+                
+                document.getElementById('loadingBar').style.width = `${progress}%`;
+                
+                // Update loading text
+                if (progress < 30) {
+                    document.getElementById('loadingModel').textContent = 'Загрузка 3D моделей...';
+                } else if (progress < 70) {
+                    document.getElementById('loadingModel').textContent = 'Оптимизация текстур...';
+                } else {
+                    document.getElementById('loadingModel').textContent = 'Инициализация сцены...';
+                }
+                
+            }, 100);
+        }
+        
+        function updateLoadingProgress(type, percent) {
+            // Update specific loading indicator
+        }
+        
+        // Initialize UI
+        function initUI() {
+            // Generate sites grid
+            generateSitesGrid();
+            
+            // Generate tour steps
+            generateTourSteps();
+            
+            // Generate layers
+            generateLayers();
+            
+            // Add hotspots for current site
+            addHotspots(currentSiteId);
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Create matrix background
+            createMatrixBackground();
+            
+            // Initialize sliders
+            initSliders();
+        }
+        
+        // Generate sites grid in sidebar
+        function generateSitesGrid() {
+            const grid = document.getElementById('sitesGrid');
+            grid.innerHTML = '';
+            
+            sites.forEach(site => {
+                const siteElement = document.createElement('div');
+                siteElement.className = `site-thumb ${site.id === currentSiteId ? 'active' : ''}`;
+                siteElement.dataset.id = site.id;
+                
+                siteElement.innerHTML = `
+                    <div class="site-thumb-icon" style="color:${site.color}">
+                        <i class="${site.icon}"></i>
+                    </div>
+                    <div class="site-thumb-name">${site.name}</div>
+                    ${site.hotspots ? `<div class="site-thumb-badge">${site.hotspots.length}</div>` : ''}
+                `;
+                
+                siteElement.addEventListener('click', () => {
+                    switchSite(site.id);
+                });
+                
+                grid.appendChild(siteElement);
+            });
+        }
+        
+        // Switch to different site
+        function switchSite(siteId) {
+            currentSiteId = siteId;
+            const site = sites.find(s => s.id === siteId);
+            
+            if (!site) return;
+            
+            // Update active site in grid
+            document.querySelectorAll('.site-thumb').forEach(thumb => {
+                thumb.classList.remove('active');
+                if (parseInt(thumb.dataset.id) === siteId) {
+                    thumb.classList.add('active');
+                }
+            });
+            
+            // Update info overlay
+            document.getElementById('currentSiteName').textContent = site.name;
+            document.getElementById('currentSiteDesc').textContent = site.description;
+            
+            // Update model scale
+            if (model) {
+                model.scale.setScalar(site.scale);
+            }
+            
+            // Update hotspots
+            removeHotspots();
+            addHotspots(siteId);
+            
+            // Load new model (in real implementation)
+            // loadModel(`models/site${siteId}.glb`);
+            
+            // Reset camera position
+            controls.reset();
+            
+            // Show notification
+            showNotification(`Загружен: ${site.name}`);
+        }
+        
+        // Add hotspots for site
+        function addHotspots(siteId) {
+            const site = sites.find(s => s.id === siteId);
+            if (!site || !site.hotspots) return;
+            
+            const container = document.getElementById('three-container');
+            
+            site.hotspots.forEach((hotspot, index) => {
+                const hotspotElement = document.createElement('div');
+                hotspotElement.className = 'hotspot';
+                hotspotElement.style.left = `${hotspot.x}px`;
+                hotspotElement.style.top = `${hotspot.y}px`;
+                hotspotElement.dataset.index = index;
+                
+                hotspotElement.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <div class="hotspot-tooltip">
+                        <strong>${hotspot.title}</strong><br>
+                        <small>${hotspot.desc}</small>
+                    </div>
+                `;
+                
+                hotspotElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showHotspotInfo(hotspot);
+                });
+                
+                container.appendChild(hotspotElement);
+            });
+        }
+        
+        // Remove all hotspots
+        function removeHotspots() {
+            document.querySelectorAll('.hotspot').forEach(hotspot => {
+                hotspot.remove();
+            });
+        }
+        
+        // Show hotspot information
+        function showHotspotInfo(hotspot) {
+            // In a real implementation, this would show detailed info
+            // For now, just show a notification
+            showNotification(`${hotspot.title}: ${hotspot.desc}`);
+            
+            // Animate camera to look at this point
+            // This is a simplified version
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+        
+        // Generate tour steps
+        function generateTourSteps() {
+            const stepsContainer = document.getElementById('tourSteps');
+            stepsContainer.innerHTML = '';
+            
+            const tourSteps = [
+                {number: 1, title: "Вход в комплекс", duration: "2 мин", active: true},
+                {number: 2, title: "Центральный зал", duration: "5 мин", active: false},
+                {number: 3, title: "Исследование деталей", duration: "8 мин", active: false},
+                {number: 4, title: "Архитектурные особенности", duration: "4 мин", active: false},
+                {number: 5, title: "Исторический контекст", duration: "6 мин", active: false},
+                {number: 6, title: "Завершение тура", duration: "1 мин", active: false}
+            ];
+            
+            tourSteps.forEach(step => {
+                const stepElement = document.createElement('div');
+                stepElement.className = `tour-step ${step.active ? 'active' : ''}`;
+                
+                stepElement.innerHTML = `
+                    <div class="step-number">${step.number}</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:500;">${step.title}</div>
+                        <div style="font-size:0.8rem;opacity:0.7;">Длительность: ${step.duration}</div>
+                    </div>
+                    ${step.active ? '<i class="fas fa-play" style="color:var(--secondary);"></i>' : '<i class="fas fa-lock" style="opacity:0.5;"></i>'}
+                `;
+                
+                stepElement.addEventListener('click', () => {
+                    if (step.active) {
+                        startTourStep(step.number);
+                    }
+                });
+                
+                stepsContainer.appendChild(stepElement);
+            });
+        }
+        
+        // Generate layers control
+        function generateLayers() {
+            const layersList = document.getElementById('layersList');
+            const layers = [
+                {name: "Архитектура", visible: true, color: "#00D4AA"},
+                {name: "Текстуры", visible: true, color: "#FF6B9D"},
+                {name: "Освещение", visible: true, color: "#9D4EFF"},
+                {name: "Тени", visible: true, color: "#4E9DFF"},
+                {name: "Декорации", visible: false, color: "#FFD166"},
+                {name: "Информационные метки", visible: true, color: "#06D6A0"}
+            ];
+            
+            layersList.innerHTML = layers.map(layer => `
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <div style="width:12px;height:12px;border-radius:50%;background:${layer.color};"></div>
+                        <span>${layer.name}</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" ${layer.visible ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            `).join('');
+            
+            // Add some CSS for switch
+            const style = document.createElement('style');
+            style.textContent = `
+                .switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 50px;
+                    height: 24px;
+                }
+                .switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+                .slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(255,255,255,0.1);
+                    transition: .4s;
+                    border-radius: 34px;
+                }
+                .slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 16px;
+                    width: 16px;
+                    left: 4px;
+                    bottom: 4px;
+                    background-color: white;
+                    transition: .4s;
+                    border-radius: 50%;
+                }
+                input:checked + .slider {
+                    background-color: var(--secondary);
+                }
+                input:checked + .slider:before {
+                    transform: translateX(26px);
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize sliders
+        function initSliders() {
+            const sliders = [
+                {id: 'brightnessSlider', valueId: 'brightnessValue', initial: 75},
+                {id: 'contrastSlider', valueId: 'contrastValue', initial: 60}
+            ];
+            
+            sliders.forEach(sliderData => {
+                const slider = document.getElementById(sliderData.id);
+                const fill = slider.querySelector('.slider-fill');
+                const handle = slider.querySelector('.slider-handle');
+                const valueDisplay = document.getElementById(sliderData.valueId);
+                
+                let isDragging = false;
+                
+                function updateSlider(x) {
+                    const rect = slider.getBoundingClientRect();
+                    let percent = (x - rect.left) / rect.width;
+                    percent = Math.max(0, Math.min(1, percent));
+                    
+                    fill.style.width = `${percent * 100}%`;
+                    handle.style.left = `${percent * 100}%`;
+                    valueDisplay.textContent = `${Math.round(percent * 100)}%`;
+                    
+                    // Update renderer or post-processing effects here
+                    if (sliderData.id === 'brightnessSlider') {
+                        // Update brightness
+                        renderer.toneMappingExposure = 0.5 + percent * 1.5;
+                    }
+                }
+                
+                // Set initial value
+                updateSlider(slider.getBoundingClientRect().left + (sliderData.initial / 100) * slider.clientWidth);
+                
+                // Mouse events
+                slider.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    updateSlider(e.clientX);
+                });
+                
+                window.addEventListener('mousemove', (e) => {
+                    if (isDragging) {
+                        updateSlider(e.clientX);
+                    }
+                });
+                
+                window.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+                
+                // Touch events
+                slider.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    updateSlider(e.touches[0].clientX);
+                });
+                
+                window.addEventListener('touchmove', (e) => {
+                    if (isDragging) {
+                        updateSlider(e.touches[0].clientX);
+                    }
+                });
+                
+                window.addEventListener('touchend', () => {
+                    isDragging = false;
+                });
+            });
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Control buttons
+            document.getElementById('rotateMode').addEventListener('click', () => {
+                controls.enableRotate = true;
+                controls.enablePan = false;
+                controls.enableZoom = true;
+                updateActiveControl('rotateMode');
+            });
+            
+            document.getElementById('panMode').addEventListener('click', () => {
+                controls.enableRotate = false;
+                controls.enablePan = true;
+                controls.enableZoom = true;
+                updateActiveControl('panMode');
+            });
+            
+            document.getElementById('zoomMode').addEventListener('click', () => {
+                controls.enableRotate = true;
+                controls.enablePan = false;
+                controls.enableZoom = true;
+                updateActiveControl('zoomMode');
+            });
+            
+            document.getElementById('measureMode').addEventListener('click', () => {
+                toggleMeasureMode();
+            });
+            
+            document.getElementById('xrayMode').addEventListener('click', function() {
+                this.classList.toggle('active');
+                toggleXRayMode(this.classList.contains('active'));
+            });
+            
+            document.getElementById('vrMode').addEventListener('click', toggleVRMode);
+            
+            document.getElementById('screenshot').addEventListener('click', takeScreenshot);
+            
+            document.getElementById('resetView').addEventListener('click', () => {
+                controls.reset();
+            });
+            
+            document.getElementById('toggleInfo').addEventListener('click', () => {
+                const overlay = document.getElementById('infoOverlay');
+                overlay.classList.toggle('hidden');
+                const icon = document.getElementById('toggleInfo').querySelector('i');
+                icon.className = overlay.classList.contains('hidden') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+                document.getElementById('toggleInfo').innerHTML = `<i class="${icon.className}"></i> ${overlay.classList.contains('hidden') ? 'Показать информацию' : 'Скрыть информацию'}`;
+            });
+            
+            // Tab navigation
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    const tabId = this.dataset.tab + 'Tab';
+                    document.getElementById(tabId).style.display = 'block';
+                });
+            });
+            
+            // Control mode buttons
+            document.querySelectorAll('.control-mode-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.control-mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const mode = this.dataset.mode;
+                    switchRenderMode(mode);
+                });
+            });
+            
+            // Measurement tool
+            document.getElementById('startMeasure').addEventListener('click', () => {
+                isMeasuring = !isMeasuring;
+                const btn = document.getElementById('startMeasure');
+                if (isMeasuring) {
+                    btn.innerHTML = '<i class="fas fa-stop"></i> Завершить измерение';
+                    measurePoints = [];
+                    document.getElementById('measurementResult').textContent = '0.00 m';
+                } else {
+                    btn.innerHTML = '<i class="fas fa-play"></i> Начать измерение';
+                    measurePoints = [];
+                }
+            });
+            
+            // Export button
+            document.getElementById('exportModel').addEventListener('click', exportModel);
+            
+            // Sidebar controls
+            document.getElementById('closeSidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('active');
+            });
+            
+            document.getElementById('toggleSidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+            
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (isMeasuring) {
+                        isMeasuring = false;
+                        measurePoints = [];
+                        document.getElementById('startMeasure').innerHTML = '<i class="fas fa-play"></i> Начать измерение';
+                    }
+                    
+                    if (isVRActive) {
+                        toggleVRMode();
+                    }
+                    
+                    document.getElementById('sidebar').classList.remove('active');
+                }
+            });
+        }
+        
+        // Update active control button
+        function updateActiveControl(activeId) {
+            ['rotateMode', 'panMode', 'zoomMode', 'measureMode'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.classList.remove('active');
+            });
+            document.getElementById(activeId).classList.add('active');
+            
+            // Show/hide measurement tool
+            const measurementTool = document.getElementById('measurementTool');
+            if (activeId === 'measureMode') {
+                measurementTool.classList.add('active');
+            } else {
+                measurementTool.classList.remove('active');
+                isMeasuring = false;
+                measurePoints = [];
+                document.getElementById('startMeasure').innerHTML = '<i class="fas fa-play"></i> Начать измерение';
+            }
+        }
+        
+        // Toggle measurement mode
+        function toggleMeasureMode() {
+            const isActive = document.getElementById('measureMode').classList.toggle('active');
+            updateActiveControl('measureMode');
+            
+            if (isActive) {
+                controls.enableRotate = false;
+                controls.enablePan = false;
+                controls.enableZoom = false;
+            } else {
+                controls.enableRotate = true;
+                controls.enablePan = false;
+                controls.enableZoom = true;
+            }
+        }
+        
+        // Toggle X-Ray mode
+        function toggleXRayMode(enable) {
+            if (model) {
+                model.traverse((node) => {
+                    if (node.isMesh) {
+                        node.material.transparent = enable;
+                        node.material.opacity = enable ? 0.3 : 1.0;
+                    }
+                });
+            }
+        }
+        
+        // Toggle VR mode
+        function toggleVRMode() {
+            if (!isVRActive) {
+                // Enter VR mode
+                if (!vrEffect) {
+                    vrEffect = new THREE.StereoEffect(renderer);
+                    vrEffect.setSize(window.innerWidth, window.innerHeight);
+                }
+                
+                isVRActive = true;
+                document.getElementById('vrMode').classList.add('active');
+                document.getElementById('vrIndicator').classList.add('active');
+                
+                // In a real implementation, you would use WebXR API
+                showNotification("VR режим активирован. Используйте VR гарнитуру.");
+            } else {
+                // Exit VR mode
+                isVRActive = false;
+                document.getElementById('vrMode').classList.remove('active');
+                document.getElementById('vrIndicator').classList.remove('active');
+                
+                showNotification("VR режим деактивирован.");
+            }
+        }
+        
+        // Switch render mode
+        function switchRenderMode(mode) {
+            // Update scene based on mode
+            switch(mode) {
+                case 'day':
+                    scene.background = new THREE.Color(0x87CEEB);
+                    break;
+                case 'night':
+                    scene.background = new THREE.Color(0x0F1E2D);
+                    break;
+                case 'storm':
+                    scene.background = new THREE.Color(0x4A5568);
+                    break;
+                case 'wireframe':
+                    if (model) {
+                        model.traverse((node) => {
+                            if (node.isMesh) {
+                                node.material.wireframe = true;
+                            }
+                        });
+                    }
+                    break;
+                case 'textured':
+                    if (model) {
+                        model.traverse((node) => {
+                            if (node.isMesh) {
+                                node.material.wireframe = false;
+                            }
+                        });
+                    }
+                    break;
+                case 'solid':
+                    // Solid color mode
+                    break;
+            }
+        }
+        
+        // Handle mouse click for measurements
+        function onMouseClick(event) {
+            if (!isMeasuring) return;
+            
+            // Calculate mouse position in normalized device coordinates
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // Update raycaster
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Calculate objects intersecting the picking ray
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            
+            if (intersects.length > 0) {
+                const point = intersects[0].point;
+                measurePoints.push(point);
+                
+                // Create visual marker
+                const markerGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xFF6B9D });
+                const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+                marker.position.copy(point);
+                scene.add(marker);
+                
+                // Store reference to remove later
+                marker.userData.isMeasurementMarker = true;
+                
+                // If we have two points, calculate distance
+                if (measurePoints.length === 2) {
+                    const distance = measurePoints[0].distanceTo(measurePoints[1]);
+                    document.getElementById('measurementResult').textContent = `${distance.toFixed(2)} m`;
+                    
+                    // Draw line between points
+                    const lineGeometry = new THREE.BufferGeometry().setFromPoints(measurePoints);
+                    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00D4AA, linewidth: 2 });
+                    const line = new THREE.Line(lineGeometry, lineMaterial);
+                    scene.add(line);
+                    line.userData.isMeasurementMarker = true;
+                    
+                    // Reset for next measurement
+                    measurePoints = [];
+                    
+                    showNotification(`Измеренное расстояние: ${distance.toFixed(2)} метров`);
+                } else if (measurePoints.length === 1) {
+                    document.getElementById('measurementResult').textContent = 'Выберите вторую точку';
+                }
+            }
+        }
+        
+        // Start tour step
+        function startTourStep(stepNumber) {
+            showNotification(`Начало этапа ${stepNumber} экскурсии`);
+            
+            // Animate camera through predefined path
+            // This is a simplified version - in reality you would have predefined camera positions
+            const targetPosition = new THREE.Vector3(
+                Math.sin(stepNumber) * 10,
+                5,
+                Math.cos(stepNumber) * 10
+            );
+            
+            // Smooth camera animation
+            new TWEEN.Tween(camera.position)
+                .to(targetPosition, 2000)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .start();
+                
+            new TWEEN.Tween(controls.target)
+                .to(new THREE.Vector3(0, 0, 0), 2000)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .start();
+        }
+        
+        // Take screenshot
+        function takeScreenshot() {
+            renderer.render(scene, camera);
+            const dataURL = renderer.domElement.toDataURL('image/png');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = `screenshot_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.png`;
+            link.click();
+            
+            showNotification("Скриншот сохранен!");
+        }
+        
+        // Export model
+        function exportModel() {
+            // In a real implementation, you would export the GLTF/OBJ file
+            // For now, just show options
+            showNotification("Экспорт модели: выберите формат (GLTF, OBJ, STL)");
+            
+            // Create export menu
+            const exportMenu = document.createElement('div');
+            exportMenu.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--glass-dark);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 2rem;
+                z-index: 10000;
+                min-width: 300px;
+            `;
+            
+            exportMenu.innerHTML = `
+                <h3 style="margin-bottom:1.5rem;color:var(--secondary);">Экспорт 3D модели</h3>
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    <button class="export-format" data-format="gltf" style="padding:1rem;background:var(--glass);border-radius:12px;border:none;color:white;cursor:pointer;text-align:left;">
+                        <i class="fas fa-cube"></i> GLTF (рекомендуется)
+                    </button>
+                    <button class="export-format" data-format="obj" style="padding:1rem;background:var(--glass);border-radius:12px;border:none;color:white;cursor:pointer;text-align:left;">
+                        <i class="fas fa-cube"></i> OBJ + MTL
+                    </button>
+                    <button class="export-format" data-format="stl" style="padding:1rem;background:var(--glass);border-radius:12px;border:none;color:white;cursor:pointer;text-align:left;">
+                        <i class="fas fa-cube"></i> STL (для 3D печати)
+                    </button>
+                </div>
+                <button id="closeExport" style="margin-top:1.5rem;width:100%;padding:1rem;background:var(--secondary);color:var(--primary);border:none;border-radius:12px;font-weight:bold;cursor:pointer;">
+                    Отмена
+                </button>
+            `;
+            
+            document.body.appendChild(exportMenu);
+            
+            // Add event listeners
+            exportMenu.querySelectorAll('.export-format').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const format = this.dataset.format;
+                    showNotification(`Экспорт в формате ${format.toUpperCase()} начат`);
+                    document.body.removeChild(exportMenu);
+                });
+            });
+            
+            exportMenu.querySelector('#closeExport').addEventListener('click', () => {
+                document.body.removeChild(exportMenu);
+            });
+        }
+        
+        // Create matrix background effect
+        function createMatrixBackground() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.zIndex = '-1';
+            document.getElementById('matrixBg').appendChild(canvas);
+            
+            const chars = "01";
+            const charSize = 14;
+            const columns = canvas.width / charSize;
+            const drops = [];
+            
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(15, 30, 45, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00D4AA';
+                ctx.font = `${charSize}px monospace`;
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(char, i * charSize, drops[i] * charSize);
+                    
+                    if (drops[i] * charSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            function animateMatrix() {
+                drawMatrix();
+                requestAnimationFrame(animateMatrix);
+            }
+            
+            animateMatrix();
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                background: var(--glass-dark);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-left: 4px solid var(--secondary);
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                z-index: 10000;
+                transform: translateX(100%);
+                opacity: 0;
+                transition: all 0.3s;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 10);
+            
+            // Remove after delay
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            if (vrEffect) {
+                vrEffect.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update controls
+            controls.update();
+            
+            // Update TWEEN animations
+            TWEEN.update();
+            
+            // Update stats
+            updateStats();
+            
+            // Render scene
+            if (isVRActive && vrEffect) {
+                vrEffect.render(scene, camera);
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+        
+        // Update statistics display
+        function updateStats() {
+            if (model) {
+                // Update polygon count (simplified)
+                const polyCount = Math.floor(10000 + Math.random() * 5000);
+                document.getElementById('polyCount').textContent = `${(polyCount / 1000).toFixed(1)}K`;
+                
+                // Update other stats
+                const fps = Math.floor(1000 / 16.67); // Simplified FPS calculation
+                document.getElementById('textureSize').textContent = `${(8.2 + Math.random() * 0.5).toFixed(1)}MB`;
+                document.getElementById('scaleValue').textContent = `1:${Math.floor(50 + Math.random() * 10)}`;
+                document.getElementById('lodLevel').textContent = fps > 30 ? 'High' : 'Medium';
+            }
+        }
+        
+        // Clean up measurement markers
+        function cleanupMeasurementMarkers() {
+            scene.children.forEach(child => {
+                if (child.userData && child.userData.isMeasurementMarker) {
+                    scene.remove(child);
+                }
+            });
+        }
+        
+        // Initialize everything when page loads
+        window.addEventListener('DOMContentLoaded', initThreeJS);
+        
+        // Add TWEEN library (simplified version for demo)
+        class TWEEN {
+            static Tween = class {
+                constructor(object) {
+                    this.object = object;
+                    this.toValues = {};
+                    this.duration = 1000;
+                    this.easing = TWEEN.Easing.Linear.None;
+                }
+                
+                to(values, duration) {
+                    this.toValues = values;
+                    this.duration = duration;
+                    return this;
+                }
+                
+                easing(easing) {
+                    this.easing = easing;
+                    return this;
+                }
+                
+                start() {
+                    // Simplified animation
+                    const startTime = Date.now();
+                    const startValues = { ...this.object };
+                    
+                    const animate = () => {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / this.duration, 1);
+                        const easedProgress = this.easing(progress);
+                        
+                        Object.keys(this.toValues).forEach(key => {
+                            this.object[key] = startValues[key] + 
+                                (this.toValues[key] - startValues[key]) * easedProgress;
+                        });
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        }
+                    };
+                    
+                    animate();
+                }
+            };
+            
+            static update() {
+                // Placeholder for TWEEN updates
+            }
+            
+            static Easing = {
+                Linear: {
+                    None: (k) => k
+                },
+                Quadratic: {
+                    InOut: (k) => {
+                        if ((k *= 2) < 1) return 0.5 * k * k;
+                        return -0.5 * (--k * (k - 2) - 1);
+                    }
+                }
+            };
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+    // --- 1. АЙНЫМАЛЫЛАР ЖӘНЕ БАПТАУЛАР ---
+async (async function do {
+    name
+} while (condition);(params) {
+    params
+}) => {
+        let scene, camera, renderer, controls;
+    
+}    let currentModelGroup = new THREE.Group();
+    let ambientLight, directionalLight;
+    
+    // Интерфейс элементтері
+    const container = document.getElementById('three-container');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const loadingBar = document.getElementById('loadingBar');
+    
+    // Деректер базасы (Сайттар тізімі)
+    const sitesData = [
+        { id: 1, name: "Шопан Ата", desc: "XIV ғасырдағы жерасты мешіті", poly: "12.4K", icon: "fa-mosque" },
+        { id: 2, name: "Бекет Ата", desc: "Оғыланды жеріндегі мешіт", poly: "15.1K", icon: "fa-place-of-worship" },
+        { id: 3, name: "Сұлтан Епе", desc: "Теңіз жағасындағы кесене", poly: "10.8K", icon: "fa-water" },
+        { id: 4, name: "Шақпақ Ата", desc: "Тасқа қашалған мешіт", poly: "18.2K", icon: "fa-mountain" }
+    ];
+
+    // --- 2. INITIALIZATION (БАСТАПҚЫ ОРНАТУ) ---
+    function init() {
+        // Сахна
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0F1E2D); // Бастапқы түс
+        scene.fog = new THREE.FogExp2(0x0F1E2D, 0.02);
+
+        // Камера
+        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(10, 5, 10);
+
+        // Рендерер
+        renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Бақылау (Controls)
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2; // Жер астына түсіп кетпеу үшін
+
+        // Жарықтандыру
+        ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Жалпы жарық
+        scene.add(ambientLight);
+
+        directionalLight = new THREE.DirectionalLight(0xffd700, 1); // Күн сәулесі
+        directionalLight.position.set(5, 10, 7);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // --- МОДЕЛЬ ЖАСАУ (Файл жоқ болғандықтан кодпен саламыз) ---
+        createMockModel();
+
+        // Терезе өлшемі өзгергенде
+        window.addEventListener('resize', onWindowResize);
+
+        // Жүктеу экранын өшіру имитациясы
+        simulateLoading();
+
+        // Интерфейс оқиғаларын қосу
+        setupEventListeners();
+        
+        // Сайдбарды толтыру
+        populateSidebar();
+
+        // Анимацияны бастау
+        animate();
+    }
+
+    // "Шопан Ата" ұқсас уақытша модель
+    function createMockModel() {
+        // Ескі модельді өшіру
+        scene.remove(currentModelGroup);
+        currentModelGroup = new THREE.Group();
+
+        // Материал
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xE5D3B3, // Құм түстес
+            roughness: 0.7,
+            metalness: 0.1
+        });
+
+        // Негізі (Base)
+        const baseGeo = new THREE.BoxGeometry(4, 2, 4);
+        const base = new THREE.Mesh(baseGeo, material);
+        base.position.y = 1;
+        base.castShadow = true;
+        base.receiveShadow = true;
+        currentModelGroup.add(base);
+
+        // Төбесі (Dome)
+        const domeGeo = new THREE.SphereGeometry(2.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+        const dome = new THREE.Mesh(domeGeo, material);
+        dome.position.y = 2;
+        dome.castShadow = true;
+        currentModelGroup.add(dome);
+
+        // Кіреберіс аркалары
+        const geometryBox = new THREE.BoxGeometry(1.5, 1.5, 0.5);
+        const entrance = new THREE.Mesh(geometryBox, new THREE.MeshStandardMaterial({ color: 0x2a2a2a }));
+        entrance.position.set(0, 1, 2.01);
+        currentModelGroup.add(entrance);
+
+        scene.add(currentModelGroup);
+        
+        // Тор (Grid)
+        const gridHelper = new THREE.GridHelper(20, 20, 0x00D4AA, 0x444444);
+        scene.add(gridHelper);
+    }
+
+    // --- 3. ИНТЕРФЕЙС ЛОГИКАСЫ (БАТЫРМАЛАР) ---
+    function setupEventListeners() {
+        
+        // 3.1 Төменгі батырмалар (Control Bar)
+        
+        // Айналдыру режимі
+        document.getElementById('rotateMode').addEventListener('click', () => {
+            controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+            setActiveButton('rotateMode');
+        });
+
+        // Жылжыту (Pan) режимі
+        document.getElementById('panMode').addEventListener('click', () => {
+            controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+            setActiveButton('panMode');
+        });
+
+        // Zoom режимі (тек индикация)
+        document.getElementById('zoomMode').addEventListener('click', () => {
+            setActiveButton('zoomMode');
+            // Zoom әрқашан скроллмен жұмыс істейді, бұл тек визуальды
+        });
+
+        // Көріністі қалпына келтіру (Reset)
+        document.getElementById('resetView').addEventListener('click', () => {
+            controls.reset();
+            camera.position.set(10, 5, 10);
+        });
+
+        // Скриншот жасау
+        document.getElementById('screenshot').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = '3d-tour-screenshot.png';
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+        });
+
+        // 3.2 Сайдбар баптаулары (Settings)
+
+        // Күн/Түн режимдері
+        const modeButtons = document.querySelectorAll('.control-mode-btn');
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Актив класын ауыстыру
+                modeButtons.forEach(b => b.classList.remove('active'));
+                const target = e.currentTarget;
+                target.classList.add('active');
+                
+                const mode = target.dataset.mode;
+                updateEnvironmentMode(mode);
+            });
+        });
+
+        // Жарықтық слайдері (Brightness)
+        setupCustomSlider('brightnessSlider', (val) => {
+            document.getElementById('brightnessValue').innerText = Math.round(val * 100) + '%';
+            ambientLight.intensity = val * 1.5; // Жарықты өзгерту
+        });
+
+        // Контраст слайдері
+        setupCustomSlider('contrastSlider', (val) => {
+            document.getElementById('contrastValue').innerText = Math.round(val * 100) + '%';
+            renderer.toneMappingExposure = 0.5 + val; // Экспозицияны өзгерту
+        });
+
+        // 3.3 Қосымша UI
+        
+        // Инфо панельді жабу/ашу
+        document.getElementById('toggleInfo').addEventListener('click', function() {
+            const overlay = document.getElementById('infoOverlay');
+            overlay.classList.toggle('hidden');
+            this.innerHTML = overlay.classList.contains('hidden') ? 
+                '<i class="fas fa-chevron-down"></i> Ақпаратты ашу' : 
+                '<i class="fas fa-chevron-up"></i> Скрыть информацию';
+        });
+
+        // Сайдбар Tabs (Объекты, Тур, Слои)
+        const tabs = document.querySelectorAll('.nav-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Актив табты белгілеу
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Контентті ауыстыру
+                document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+                document.getElementById(tab.dataset.tab + 'Tab').style.display = 'block';
+            });
+        });
+
+        // Мобильді сайдбарды ашу/жабу
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('active');
+        });
+        document.getElementById('closeSidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('active');
+        });
+    }
+
+    // --- 4. КӨМЕКШІ ФУНКЦИЯЛАР ---
+
+    function setActiveButton(id) {
+        document.querySelectorAll('.control-bar .control-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function updateEnvironmentMode(mode) {
+        if (mode === 'day') {
+            scene.background = new THREE.Color(0x0F1E2D); // Көкшіл
+            scene.fog.color.set(0x0F1E2D);
+            directionalLight.intensity = 1;
+            ambientLight.intensity = 0.6;
+        } else if (mode === 'night') {
+            scene.background = new THREE.Color(0x020205); // Қара
+            scene.fog.color.set(0x020205);
+            directionalLight.intensity = 0.1;
+            ambientLight.intensity = 0.2;
+        } else if (mode === 'storm') {
+            scene.background = new THREE.Color(0x3a3a3a); // Сұр
+            scene.fog.color.set(0x3a3a3a);
+            directionalLight.intensity = 0.3;
+        } else if (mode === 'wireframe') {
+            // Каркас режимі
+            currentModelGroup.traverse(child => {
+                if (child.isMesh) child.material.wireframe = true;
+            });
+        } else if (mode === 'solid' || mode === 'textured') {
+            // Қалыпты режим
+            currentModelGroup.traverse(child => {
+                if (child.isMesh) child.material.wireframe = false;
+            });
+        }
+    }
+
+    // Слайдер логикасы (Click & Drag)
+    function setupCustomSlider(id, callback) {
+        const slider = document.getElementById(id);
+        const fill = slider.querySelector('.slider-fill');
+        const handle = slider.querySelector('.slider-handle');
+
+        slider.addEventListener('click', (e) => {
+            const rect = slider.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let percent = x / rect.width;
+            percent = Math.max(0, Math.min(1, percent));
+            
+            fill.style.width = (percent * 100) + '%';
+            handle.style.left = (percent * 100) + '%';
+            
+            callback(percent);
+        });
+    }
+
+    // Сайдбарға сайттарды салу
+    function populateSidebar() {
+        const grid = document.getElementById('sitesGrid');
+        grid.innerHTML = ''; // Тазалау
+        
+        sitesData.forEach(site => {
+            const div = document.createElement('div');
+            div.className = 'site-thumb';
+            if(site.name === "Шопан Ата") div.classList.add('active');
+            
+            div.innerHTML = `
+                <div class="site-thumb-badge">3D</div>
+                <div class="site-thumb-icon"><i class="fas ${site.icon}"></i></div>
+                <div class="site-thumb-name">${site.name}</div>
+            `;
+            
+            div.addEventListener('click', () => {
+                // Сайтты таңдау логикасы
+                document.querySelectorAll('.site-thumb').forEach(el => el.classList.remove('active'));
+                div.classList.add('active');
+                
+                // Ақпаратты жаңарту
+                document.getElementById('currentSiteName').innerText = site.name;
+                document.getElementById('currentSiteDesc').innerText = site.desc;
+                document.getElementById('polyCount').innerText = site.poly;
+                
+                // Анимациямен модельді "қайта жүктеу"
+                loadingScreen.style.opacity = '1';
+                loadingScreen.style.pointerEvents = 'auto';
+                setTimeout(() => simulateLoading(), 500);
+            });
+            
+            grid.appendChild(div);
+        });
+    }
+
+    function simulateLoading() {
+        let width = 0;
+        const interval = setInterval(() => {
+            width += 5;
+            loadingBar.style.width = width + '%';
+            if (width >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.style.pointerEvents = 'none';
+                    document.getElementById('mainContainer').style.opacity = '1';
+                }, 500);
+            }
+        }, 50); // Жүктеу жылдамдығы
+    }
+
+    function onWindowResize() {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // Қосымшаны іске қосу
+    init();
+
+</script>
+    </script>
+</body>
+</html>

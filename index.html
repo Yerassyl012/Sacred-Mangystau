@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="kk,ru,en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mangystau Sacred Heritage | UNEARTHED FLL Project</title>
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500&display=swap" rel="stylesheet">
+    <!-- 3D Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Map Library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <style>
+        :root {
+            --primary: #2A5C82;
+            --secondary: #D4A76A;
+            --accent: #8B4513;
+            --light: #F5F1EA;
+            --dark: #1A2C3A;
+            --success: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .arabic-text {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            direction: rtl;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, #1A3A5A 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo-text span {
+            font-size: 1rem;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .language-switcher {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem;
+            border-radius: 10px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: var(--secondary);
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(rgba(42,92,130,0.9), rgba(26,44,58,0.9)), url('pattern.svg');
+            background-size: cover;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h2 {
+            font-size: 3.2rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .btn-primary:hover {
+            background: #E6B85C;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(212,167,106,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        /* Interactive Map Section */
+        .map-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            font-size: 1.1rem;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative;
+            border: 1px solid #ddd;
+        }
+
+        #heritage-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 1000;
+            width: 300px;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .site-list h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .site-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .site-item:hover {
+            background: #f0f7ff;
+            transform: translateX(5px);
+        }
+
+        .site-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .site-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .site-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* 3D Viewer Section */
+        .viewer-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .viewer-container {
+            display: flex;
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .viewer-3d {
+            flex: 1;
+            height: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            background: #1a1a1a;
+        }
+
+        #model-viewer {
+            width: 100%;
+            height: 100%;
+        }
+
+        .viewer-info {
+            flex: 1;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .viewer-info h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .viewer-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        /* Sites Grid */
+        .sites-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .site-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .site-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .site-image {
+            height: 220px;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .site-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .site-number {
+            background: var(--secondary);
+            color: var(--dark);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .site-content {
+            padding: 2rem;
+        }
+
+        .site-content h4 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .site-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag {
+            background: #eef7ff;
+            color: var(--primary);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* AR Section */
+        .ar-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #1A3A5A 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .ar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ar-phone-mockup {
+            position: relative;
+            width: 300px;
+            height: 600px;
+            background: #222;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border: 10px solid #111;
+        }
+
+        .ar-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ar-screen::after {
+            content: "👆 Наведите камеру";
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .ar-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .ar-info h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+            transform: translateX(5px);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #444;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .fll-badge {
+            background: #FF6B35;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .viewer-container, .ar-container {
+                flex-direction: column;
+            }
+            
+            .map-sidebar {
+                position: relative;
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+            
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+            }
+            
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                margin-top: 1.5rem;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .sites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 3000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    overflow: auto;
+}
+
+.modal-content {
+    background: white;
+    max-width: 700px;
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 20px;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 15px;
+    margin: 1rem 0;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #555;
+}
+
+#modalTags span {
+    display: inline-block;
+    margin: 5px 5px 0 0;
+    padding: 5px 12px;
+    background: #eef7ff;
+    border-radius: 20px;
+    color: var(--primary);
+    font-size: 0.85rem;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: scale(0.95);}
+    to {opacity: 1; transform: scale(1);}
+}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🏺</div>
+            <div class="logo-text">
+                <h1>Mangystau Sacred Heritage</h1>
+                <span>FLL UNEARTHED Project</span>
+            </div>
+        </div>
+        
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <nav class="nav-links" id="navLinks">
+            <a href="#map">Карта</a>
+            <a href="objectives.html">Объекты</a>
+            <a href="3d.html">3D Тур</a>
+            <a href="#ar">AR Режим</a>
+            <a href="#about">О проекте</a>
+            
+            <div class="language-switcher">
+                <button class="lang-btn" data-lang="kk" onclick="window.open('kk.html', '_self')">Қаз</button>
+                <button class="lang-btn active" data-lang="ru">Рус</button>
+                <button class="lang-btn" data-lang="en" onclick="window.open('en.html', '_self')">Eng</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" data-aos="fade-up">
+        <h2>Сакральное наследие Мангыстау</h2>
+        <p>Интерактивная цифровая платформа для сохранения и изучения 21 сакральных объектов Западного Казахстана. Проект команды FLL на тему UNEARTHED.</p>
+        
+        <div class="cta-buttons">
+            <button class="btn btn-primary" id="exploreBtn">
+                <i class="fas fa-map-marked-alt"></i> Исследовать на карте
+            </button>
+            <button class="btn btn-outline" id="virtualTourBtn" onclick="window.open('3d.html', '_self')">
+                <i class="fas fa-vr-cardboard"></i> Виртуальный тур
+            </button>
+        </div>
+    </section>
+
+    <!-- Interactive Map -->
+    <section class="map-section" id="map" data-aos="fade-up">
+        <h2 class="section-title">Интерактивная карта наследия</h2>
+        <p class="section-subtitle">Нажмите на маркер, чтобы узнать больше о каждом сакральном месте Мангыстау</p>
+        
+        <div class="map-container">
+            <div id="heritage-map"></div>
+            
+            <div class="map-sidebar">
+                <div class="site-list">
+                    <h3><i class="fas fa-landmark"></i> 21 Сакральных объектов</h3>
+                    <div class="site-item active" data-id="1">
+                        <div class="site-name">1. Шопан Ата</div>
+                        <div class="site-desc">Духовное начало, подземная мечеть</div>
+                    </div>
+                    <div class="site-item" data-id="2">
+                        <div class="site-name">2. Караман Ата</div>
+                        <div class="site-desc">Справедливость и мудрость</div>
+                    </div>
+                    <div class="site-item" data-id="3">
+                        <div class="site-name">3. Кенти Баба</div>
+                        <div class="site-desc">Чистота сердца, проверка намерений</div>
+                    </div>
+                    <div class="site-item" data-id="4">
+                        <div class="site-name">4. Күйеу Там</div>
+                        <div class="site-desc">Кесена верности и честности</div>
+                    </div>
+                    <div class="site-item" data-id="5">
+                        <div class="site-name">5. Бекет Ата (Оғыланды)</div>
+                        <div class="site-desc">Духовное знание и воспитание</div>
+                    </div>
+                    <div class="site-item" data-id="6">
+                        <div class="site-name">6. Сұлтан Епе</div>
+                        <div class="site-desc">Храбрость и защита</div>
+                    </div>
+                     </div>
+                    <div class="site-item" data-id="7">
+                        <div class="site-name">7. Масат Ата</div>
+                        <div class="site-desc">Батырлық пен рухани қолдау</div>
+                    </div>
+                    <div class="site-item" data-id="8">
+                        <div class="site-name">8. Шақпақ Ата</div>
+                        <div class="site-decs">Қасиетті киелі орын</div>
+                    </div>
+                    <div class="site-item" data-id="9">
+                        <div class="site-name">9. Ман Ата</div>
+                        <div class="site-desc">Жол жүрушілер қорғаны</div>
+                    </div>
+
+                    <div class="site-item" data-id="10">
+                        <div class="site-name">10. Отпан Тау</div>
+                        <div class="site-desc">Бабалар рухына тағзым</div>
+                    </div>
+                        
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">11. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+                    
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">12. Сисем Ата</div>
+                        <div class="site-desc">Дамыған әулие,оғыз дәуіріндегі құрылымдар</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">13. Омар-Тұр кесенесі</div>
+                        <div class="site-desc">Қазақ қолөнері мен салт-дәстүрінің айқын нышаны </div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">14. Алты Құлаш әулие</div>
+                        <div class="site-desc">Қадірлі,киелі орын</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">15. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+                    
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">16. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">17. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">18. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">19. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">20. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+
+                    <div class="site-item active" data-id="11">
+                        <div class="site-name">21. Темір-Абдал</div>
+                        <div class="site-desc">Көне, ерекше қорым тастары</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3D Viewer -->
+    <section class="viewer-section" id="3d" data-aos="fade-up">
+        <h2 class="section-title">3D Моделирование объектов</h2>
+        <p class="section-subtitle">Исследуйте детализированные 3D модели сакральных мест. Поворачивайте, приближайте, изучайте.</p>
+        
+        <div class="viewer-container">
+            <div class="viewer-3d">
+                <div id="model-viewer">
+                    <!-- 3D модель будет здесь -->
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;">
+                        <div style="text-align:center;">
+                            <i class="fas fa-sync fa-spin" style="font-size:3rem;margin-bottom:1rem;"></i><br>
+                            Загрузка 3D модели...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="viewer-info">
+                <h3>Шопан Ата: Подземная мечеть</h3>
+                <p>Первая остановка духовного пути. Место очищения сердца и разума, где чувствуется терпение и стойкость.</p>
+                
+                <div class="viewer-stats">
+                    <div class="stat">
+                        <span class="stat-number">XIV</span>
+                        <span class="stat-label">Век построения</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">12м</span>
+                        <span class="stat-label">Глубина под землей</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">47°C</span>
+                        <span class="stat-label">Летняя температура внутри</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Сохранность кирпичей</span>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="width:100%;">
+                    <i class="fas fa-expand"></i> Полноэкранный режим
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sites Grid -->
+    <section class="sites-section" id="sites" data-aos="fade-up">
+        <h2 class="section-title">21 Сакральных остановок</h2>
+        <p class="section-subtitle">Каждое место имеет уникальное духовное значение и историческую ценность</p>
+        
+        <div class="sites-grid">
+            <!-- Карточки будут сгенерированы JavaScript -->
+        </div>
+    </section>
+
+    <!-- AR Section -->
+    <section class="ar-section" id="ar" data-aos="fade-up">
+        <h2 style="font-size: 55px">Дополненная реальность (AR)</h2>
+        <p style="font-size: 20px; margin-bottom: 15px;">Используйте камеру вашего смартфона, чтобы "оживить" исторические объекты</p>
+        
+        <div class="ar-container">
+            <div class="ar-phone-mockup floating">
+                <div class="ar-screen">
+                    <i class="fas fa-monument"></i>
+                </div>
+            </div>
+            
+            <div class="ar-info">
+                <h3>AR-Гид по наследию</h3>
+                <p>Наведите камеру на маркер или QR-код, чтобы увидеть 3D модель объекта в вашем окружении. Идеально для образовательных целей и виртуальных экскурсий.</p>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-outline" style="border-color:white;color:white;">
+                        <i class="fas fa-qrcode"></i> Сканировать QR-код
+                    </button>
+                    <button class="btn btn-primary" style="margin-left:1rem;">
+                        <i class="fab fa-google-play"></i> Скачать приложение
+                    </button>
+                </div>
+                
+                <div class="fll-badge">
+                    <i class="fas fa-robot"></i> FLL Innovation Award Candidate
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="about">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Mangystau Sacred Heritage</h4>
+                <p>Проект First Lego League 2023-2024. Тема сезона: UNEARTHED.</p>
+                <p>Команда: Infinite Intellegence</p>
+                <div style="margin-top:1rem;">
+                    <i class="fas fa-users" style="margin-right:0.5rem;"></i>
+                    <strong>Команда:</strong> Мирас, Дархан, Жанқожа, Айсун, Ақтолқын, Ақжүрек, Шәкәрім
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Быстрые ссылки</h4>
+                <div class="footer-links">
+                    <a href="#map"><i class="fas fa-map"></i> Интерактивная карта</a>
+                    <a href="#3d"><i class="fas fa-cube"></i> 3D Модели</a>
+                    <a href="#ar"><i class="fas fa-mobile-alt"></i> AR Режим</a>
+                    <a href="#about"><i class="fas fa-info-circle"></i> О проекте</a>
+                    <a href="#resources"><i class="fas fa-book"></i> Образовательные материалы</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <p><i class="fas fa-envelope"></i> fll.mangystau@edu.kz</p>
+                <p><i class="fas fa-school"></i> Школа-лицей Qadam, Казахстан</p>
+                <p><i class="fas fa-trophy"></i> FIRST LEGO League Challenge</p>
+                
+                <div style="margin-top:1.5rem;">
+                    <i class="fas fa-hashtag" style="color:var(--secondary);margin-right:0.5rem;"></i>
+                    <strong>Хештеги:</strong> #FLL #UNEARTHED #Mangystau #CulturalHeritage
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>© 2024 Get Started Alpha Team. Все права защищены. | Проект создан для сохранения культурного наследия Казахстана</p>
+            <p>FIRST®, LEGO®, FIRST LEGO League™ являются товарными знаками соответствующих правообладателей.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Инициализация AOS анимаций
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // Мобильное меню
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        // Переключение языка
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const lang = this.dataset.lang;
+                // Здесь будет логика перевода контента
+                console.log('Переключение на язык:', lang);
+            });
+        });
+
+        // Инициализация карты Leaflet
+        const map = L.map('heritage-map').setView([43.5, 52.0], 7);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Данные о сакральных местах
+        const sacredSites = [
+            {id: 1, name: "Шопан Ата", lat: 43.8, lng: 51.2, desc: "Духовное начало"},
+            {id: 2, name: "Қараман Ата", lat: 43.9, lng: 52.1, desc: "Справедливость и мудрость"},
+            {id: 3, name: "Кенті Баба", lat: 44.2, lng: 52.5, desc: "Чистота сердца"},
+            {id: 4, name: "Күйеу Там", lat: 43.6, lng: 51.8, desc: "Кесена верности"},
+            {id: 5, name: "Бекет Ата", lat: 43.3, lng: 52.6, desc: "Духовное знание"},
+            {id: 6, name: "Сұлтан Епе", lat: 43.0, lng: 51.5, desc: "Храбрость и защита"}
+        ];
+
+        // Добавление маркеров на карту
+        sacredSites.forEach(site => {
+            const marker = L.marker([site.lat, site.lng])
+                .addTo(map)
+                .bindPopup(`<b>${site.name}</b><br>${site.desc}<br><button onclick="showSiteDetails(${site.id})" style="margin-top:10px;padding:5px 10px;background:var(--primary);color:white;border:none;border-radius:5px;cursor:pointer;">Подробнее</button>`);
+            
+            marker.on('click', function() {
+                highlightSiteItem(site.id);
+            });
+        });
+
+        // Подсветка выбранного объекта в сайдбаре
+        function highlightSiteItem(siteId) {
+            document.querySelectorAll('.site-item').forEach(item => {
+                item.classList.remove('active');
+                if(parseInt(item.dataset.id) === siteId) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Обработчики для сайдбара
+        document.querySelectorAll('.site-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const siteId = parseInt(this.dataset.id);
+                const site = sacredSites.find(s => s.id === siteId);
+                if(site) {
+                    map.setView([site.lat, site.lng], 10);
+                    highlightSiteItem(siteId);
+                    update3DViewer(siteId);
+                }
+            });
+        });
+
+        // Генерация карточек объектов
+        const sitesData = [
+            {id: 1, name: "Шопан Ата", color: "#2A5C82", image: "ysh_9503-1.jpg", tags: ["Подземная мечеть", "Духовность", "XIV век"],details:"Мангистауская область, примерно в 30–35 км от города Актау, встречается внутри скалистого холма.Кем был Шопан ата?  Шопан ата – покровитель пастухов и скотоводов.Можно считать его святой личностью, распространявшей ислам.В народе известен как священный человек, просящий благополучия для скота и приносящий достаток народу Предполагается, что время строительства этой мечети относится к X–XI векам.Считается одной из самых древних подземных мечетей Мангистау.Связана с ранним периодом распространения ислама Если говорить об архитектурных особенностях:высечена из твёрдого мелового камня.Подземная мечеть состоит из нескольких помещений.Внутри:зал для намаза,ниши для поклонения,в потолке есть отверстия для прохождения воздухаПриродные условия сохраняют прохладу летом, тепло зимой, естественная вентиляция хорошо сохранена.Рядом с мечетью расположен большой некрополь.В некрополе встречаются древние надгробные камни,знаки в виде тайказанов.Говорят, что это место было древним религиозным центром. Легенды и предания:Шопан ата был покровителем скота, особенно овец.Во время засухи просил дождь.Пользовался особым уважением среди местного населения.Сейчас находится под охраной государства.Сюда приезжают туристы и паломники.Историко-духовный объект Мангистау."},
+            {id: 2, name: "Караман Ата", color: "#3A6C92", image: "4-120x90.jpg", tags: ["Справедливость", "Мудрость", "Артефакты"],details:"Мангистауская область, Мангистауский район.Скалистая, засушливая степная местность.Рядом с некрополем расположен единый комплекс.Кем был Караман ата?    Караман ата – святой, проповедовавший ислам. В народе известен как справедливый, набожный, наставник на пути религии.Он проповедовал людям нравственность и единство.Мечеть была построена в XII–XIII веках.Период её строительства относится ко времени, когда ислам начал широко распространяться в МангистауМечеть высечена в природной меловой скале.Состоит из нескольких помещений:место для намаза,комнаты для учеников.На стенах имеются простые резные узоры.Так как мечеть находится под землёй, температура внутри стабильная.Сохранена естественная система вентиляции.Рядом с мечетью Караман ата расположен древний некрополь, где есть надгробные камни,на надгробиях встречаются арабские надписи.Некрополь важен как исторический источник.Мечеть Караман ата была местом религиозного обучения и воспитания.Сюда многие люди приходят для паломничества, духовного очищения.Легенды:Существует вера, что Караман ата был известен своей справедливостью, решал споры между людьми.Сейчас мечеть находится под охраной государства.До сих пор изучается и сохраняется.Эта мечеть включена в туристические маршруты."},
+            {id: 3, name: "Кенти Баба", color: "#4A7CA2", image: "images.jpeg", tags: ["Чистота сердца", "Накмерения", "Керамика"],details:"Некрополь Кенті баба – Мангистауская область,расположен в северо-восточной части полуострова Тупкараган.Между селами Шетпе и Шайыр, недалеко от ущелья Самал и подземной мечети Султан үпі.Название «Кенті баба» —в казахском языке близко по значению к «святой, великий предок».Существует мнение, что здесь похоронен человек с таким именем или почитаемая святая личность, однако точных исторических документов нет.Некрополь относится к захоронениям людей, живших в X–XVI веках. В некрополе более 130 памятников (надгробные камни, древние мавзолеи).  Здесь проводились древние погребальные обряды, исторические или религиозные ритуалы.Архитектура некрополя Кенті баба – родовой некрополь, в его составе;древние мавзолеи (усыпальницы);небольшие надгробные камни;камни с изображениями животных, скота и орнаментов.Рядом с некрополем расположены несколько важных мавзолеев.Внутри одного из них встречаются доски с установленными в изголовье рогами архара, что рассматривается как признак святости.На некоторых камнях есть изображения человека, животных, лошади, верблюда, растений, геометрические орнаменты и знак ладони.По легенде:Кенті баба — был святым, религиозным человеком.Существует вера, что некрополь Кенті баба называют «городом мёртвых»,потому что здесь на протяжении многих лет было похоронено много людей. Некоторые считают, что это место обладает духовной силой, поэтому люди приходят и загадывают желания.Современное состояние:В 2018 г. внесён в государственный список — охраняется как заповедник-мемориал. Часто показывается во время экскурсий и туров."},
+            {id: 4, name: "Куйеу Там", color: "#5A8CB2", image: "КүйеуТам.jpg", tags: ["Верность", "Архитектура"],details:"Күйеутам (Күйеу там) — историческое место в Мангистау.Это не мечеть, а название священного места и некрополя, встречается как название местности. О нём сохранилось мало письменных сведений о конкретном историческом сооружении, однако в происхождении его названия есть интересные данные.Местоположение:В Мангистауском регионе, говорится как местность, расположенная в 5–6 км от села Онды.Название и значение «Күйеутам» — слово, по звучанию близкое к значению «священный дом (мавзолей), относящийся к жениху».Точных исторических записей нет, однако среди топонимов сохранилось в народной памяти событие, связанное с этим местом:Говорят, что здесь дочь Олжи и её муж, а также человек по имени Калматай погибли из-за тяжёлой судьбы, и их могилы остались в этих местах.В тексте:   …дочь Олжи с мужем и человек по имени Калматай погибли во время преследования. В настоящее время их могилы находятся здесь, на расстоянии 3–4 км друг от друга…    Поэтому считается, что это название связано с легендой и историческим событием."},
+            {id: 5, name: "Бекет Ата", color: "#6A9CC2", image: "5-120x90.jpg", tags: ["Духовное знание", "Воспитание", "Рукописи"],details:"Местоположение:Мангистауская область, Каракиянский район, впадина Огланды, расположена внутри высокой скалы.Кем был Бекет ата?  Полное имя: Бекет Мырзагулулы(1750–1813 гг.)Казахский:великий святой, религиозный просветитель, батыр, учитель.Народом признан как провидец, мудрец, обладатель чудесной силы.Мечеть считается построенной в конце XVIII века.Мечеть была высечена собственноручно Бекет ата.Бекет ата построил в Мангистау 4 мечети, последняя – именно эта мечеть в Огланды.К архитектурным особенностям можно отнести то,что она высечена из мелового камня,полностью расположена под землей.Мечеть состоит из 4 комнат:1.Комната для совершения намаза2.Комната,где проводились религиозные уроки3.Место для гостей4.Комната,где похоронен Бекет атаПриродными особенностями считаются прохлада летом,тепло зимой,наличие специальных отверстий для прохождения воздуха,сделанные проемы для естественного света.Религиозное и духовное значение:Центр распространения ислама суфийским путем.Воспитывались ученики.Святое место,где люди загадывают желания и совершают молитвы.Считается «местом,куда снизошел дух».Легенды и предания.Бекет ата известен тем,что защищал народ от врагов,исцелял больных людей.Многие говорят,что приходят в его мечеть с намерением и находят духовное спокойствие.Современное состояние:Находится под охраной государства.Oдно из самых священных мест паломничества в Казахстане.Ежегодно приезжают тысячи людей.Туристический и духовный центр."},
+            {id: 6, name: "Султан Епе", color: "#7AACD2", image: "СұлтанЕпе.jpeg", tags: ["Храбрость", "Защита"],details:"Султан епе – святой, распространитель религии.По народным верованиям:покровитель моряков,защитник отправляющихся в путь.Святой, проповедовавший народу веру и терпение.Период строительства:XIV–XV века-период укрепления ислама в МангистауЕсли говорить об архитектурных особенностях:высечена в каменной скале.Внутри:есть помещение для поклонения,ниши для установки светильников.Простое, но прочное сооружение.Мечеть сохраняет прохладу летом,тепло зимой,естественная вентиляция сохранена.Место, куда люди приходили совершать зиярат перед выходом в море, просили благополучной дороги.Подземная мечеть, почитаемая как священное место.Cуществует вера, что Султан епе помогал людям, оставшимся в море,оберегал корабли от бедствий."},
+            {id: 7, name: "Масат Ата", color: "#7AACD2", image: "masat-ata1.jpg", tags: ["Святое место", "Истореческое наследие"],details: "Подземная мечеть Масат ата — одно из священных мест Мангистауской области Казахстана. Она относится к числу древних культовых сооружений, высеченных в скалах, и занимает особое место в духовной культуре местного населения.Мечеть связана с именем Масат ата — почитаемого святого и религиозного деятеля, который, по преданиям, распространял ислам на территории Мангистау. Это место издавна считается центром духовного очищения и паломничества.Подземная мечеть вырублена в меловой породе и состоит из нескольких помещений, соединённых узкими проходами. Внутри находятся молельная комната, ниши и священные углубления, использовавшиеся для религиозных обрядов и уединённой молитвы. Архитектура мечети отличается простотой и аскетичностью, что подчёркивает её духовное назначение.Комплекс Масат ата включает также древнее кладбище с каменными надгробиями и кулпытасами, украшенными традиционными орнаментами и арабской письменностью. Эти памятники отражают историю и мировоззрение народа Мангистау.Сегодня подземная мечеть Масат ата является объектом паломничества и историко-культурным памятником. Она привлекает не только верующих, но и туристов, интересующихся историей, архитектурой и сакральным наследием Казахстана."},
+            {id: 8, name: "Шакпак Ата", color: "#7AACD2", image: "aappaa.jpg", tags: ["Подземная мечеть", "Сакральных памятников"],details: "Подземная мечеть Шакпак ата — один из самых уникальных и древних сакральных памятников Мангистауской области Казахстана. Она расположена на полуострове Тюб-Караган и является выдающимся образцом средневековой культовой архитектуры, высеченной в скале.Мечеть относится к X–XII векам и связана с именем святого Шакпак ата, который, согласно народным преданиям, был проповедником ислама и духовным наставником. Это место с древних времён считалось центром религиозной жизни и паломничества.Архитектура мечети имеет крестообразную планировку, что является редкостью для подземных мечетей. Центральный зал соединён с четырьмя боковыми помещениями, стены которых украшены резными орнаментами, символическими изображениями, надписями и петроглифами. Внутри встречаются изображения ладоней, животных и знаков, имеющих сакральное значение.Подземная мечеть вырублена в меловых породах, что обеспечило ей сохранность на протяжении веков. В комплексе также находятся некрополь, древние захоронения и культовые сооружения, относящиеся к разным историческим периодам.Сегодня Шакпак ата является памятником истории и культуры республиканского значения. Она привлекает паломников, учёных и туристов своей загадочной атмосферой, архитектурной уникальностью и богатым духовным наследием."},
+            {id: 9, name: "Ман Ата", color: "#7AACD2", image: "Маната.jpeg", tags: ["Священное место", "Легенда","Духовное знание"],details: "Мән Ата — персонаж, занимающий особое место в легендах, преданиях и народных верованиях Мангистау. Достоверных исторических документов о его реальной биографии не сохранилось, однако согласно местным преданиям и отдельным исследованиям:Он изображается как великий учитель человечества или пророк древнейших времён. В некоторых легендах Мән Ата описывается как «первый человек» или прародитель всего человечества. Сюжеты о Мән Ата встречаются и в устных преданиях, связанных с зороастризмом, где он упоминается как пророк, распространявший разум, духовные знания и нравственные основы. Согласно легендам, он обучал людей законам, порядку и духовному учению, поэтому его имя перекликается с образами, известными в разных культурах мира.Мавзолей Мән Ата — священное место, расположенное на плато Устюрт в Мангистау. Он почитается народом как предполагаемая усыпальница Мән Ата или место, связанное с его именем в легендах.В настоящее время здесь сохранились лишь отдельные фрагменты памятниковой постройки; мавзолей полностью не восстановлен и находится под открытым небом. На стенах сохранившихся сооружений имеется обозначенное место с надписью, связанной с именем Мән Ата, а окружающие камни и возвышенности считаются местными жителями священными точками.Легенды и традиции:Связь Мән Ата и Адам Ата:В некоторых народных преданиях имя «Мән Ата» связывается с понятием «Адам Ата» и рассматривается как один из образов первого человека. Согласно этому представлению, слово «ман» может иметь древнее значение «человек», а Мән Ата воспринимается как духовное начало человечества.Мән Ата не является подтверждённой исторической личностью и относится к персонажам мифологии и легенд.Как добраться:Мавзолей Мән Ата расположен в Мангистауской области, примерно в 40 км к юго-востоку от села Сай-Өтес. Он находится в пустынно-каменистой местности плато Устюрт."},
+            {id: 10, name: "Отпан Тау", color: "#7AACD2", image: "отпантау.jpg", tags: ["Впечатляющее место", "Исторический"],details: "Отпан-тау — уникальный географический объект и историко-культурный символ Казахстана, расположенный в Мангистауской области, на территории Западного Каратау. Это самая высокая точка хребта и значимое место духовного и исторического наследия региона. Название горы в переводе с казахского языка означает «гора огня» или «гора, откуда зажигали огонь» (слово «отпан» связано с понятием огня). В разные исторические периоды Отпан-тау служил местом зажжения сигнального огня как символ единства народа и предупреждения об опасности.Местоположение: Мангистауская область, Мангистауский район (полуостров Мангышлак).Высота: около 532 метров (в некоторых источниках указывается примерно 540 метров). Отпан-тау является самой высокой точкой Западного Каратау.Историческое и культурное значение.С древних времён Отпан-тау был известен как место, где в случае угрозы зажигали огонь, подавая знак всему народу.В 2007 году на вершине горы был открыт историко-культурный комплекс «Адай ата – Отпан тау», посвящённый истории, духовному и культурному наследию Мангистауского края.Основные объекты комплекса: 1)Мавзолей Адай ата (Аксарай) Аксарай, построенный на возвышенной части горы на высоте 37 метров, является мавзолеем, возведённым в честь Адай ата и его потомков.2)Две стелы-минарета:По обе стороны мавзолея установлены стелы, посвящённые двум сыновьям Адай ата — Кудайке и Келимберды.3)Скульптура образа Матери высотой 15 метров:Возведена в знак уважения и почитания всех матерей.4)Скульптура волка (Көкбөрі):Символ силы, свободы и независимости.6)Огонь призыва (Ұран оты):Место, где во время праздника Амал зажигается священный огонь.7)Музей:В музее, расположенном на территории комплекса, представлены исторические, этнографические и религиозные экспонаты Мангистау, документы, а также шежире (родословные) племён и родов.8)362 ступени:От подножия до вершины горы ведёт лестница, состоящая из 362 ступеней.Ежегодно в комплексе «Адай ата – Отпан тау» проводится праздник Амал (Көрісу), во время которого зажигается Огонь Единства — символ сплочённости народа Казахстана и уважения к духу предков."},
+            {id: 11, name: "Темир-Абдал", color: "#7AACD2", image: "темірабдал.jpg", tags: ["Религиозное образавание","Особый некрополь"],details: "Темір Абдал – подземная мечеть.«Подземная мечеть Темір Абдал» — одна из древних подземных мечетей, расположенных в Мангистауском регионе.По предположениям исследователей об этой мечети:Местоположение:Мечеть расположена к западу от горы Шеркала.Примерно в 20 км от села Сәтпе, находящегося недалеко от города.Примерно в 170 км от города Актау.       Кто такой “Темір Абдал”? По мнению историков и исследователей:Человек, построивший эту мечеть, возможно, носил имя Темір и происходил из рода Абдал.Абдал – возможно, древний род или религиозная община, существовавшая в Мангистау.Темір Абдал, вероятно, был религиозным наставником, обучавшим людей.  Однако точных исторических документов об этой личности мало, поэтому конкретных письменных источников нет, опираемся только на предположения ученых.Строительство и особенности мечети строение:Мечеть высечена под землёй.Первоначально состояла из двух комнат.Позже потолок одной из комнат обрушился.В сохранившейся комнате нет отверстия для поступления света, свет попадает снизу.  Предполагается, что это место было построено как религиозное учебное или культовое сооружение много веков назад.Некрополь (мазар) Рядом с подземной мечетью Темір Абдал расположен некрополь:В некрополе есть особые древние каменные захоронения, называемые койтас и саганатам.Койтас – каменные надгробия с изображениями верблюжонка или овцы.Саганатам – каменные ограждённые мавзолеи с колоннами по углам.  Эти камни — уникальные памятники, встречающиеся и в других исторических местах Мангистау.Как добраться? Самое известное ориентирование – расположение к западу от горы Шеркала: Рекомендуется доехать на транспорте, затем добраться пешком или с помощью местных туров.В этот регион организуются туры, во время которых показывают сразу несколько подземных мечетей и исторических мест.  Интересные факты:Древние некропольные камни возле мечети Темір Абдал —это не единственные подобные объекты в Мангистау, а также считаются свидетельством легенд и истории региона"},
+            {id: 12, name: "Сисем Ата", color: "#7AACD2", image:"sisem-ata.jpg", tags:["Куполообразные дома","Мемориальный объект"],details: "Сисем Ата-Сайөтес (Сай-Утес) расположен примерно в 30–35 км к северу от населённого пункта, в западной части плато Устюрт.Некрополь Сисем ата развивался в XIII–XIX веках, это комплекс культурных памятников, берущий начало со средневековой истории. Здесь имеются захоронения и сооружения, относящиеся к периоду от огузо-туркменской эпохи до начала XX века.По легенде, Сисем ата — религиозный лидер, проповедник ислама, живший в этом регионе. Считается, что некрополь назван в честь этого человека.Виды памятников и архитектура:В некрополе встречаются памятники различных архитектурных форм:Купольные тамы (примерно 22),Саганатамы (стационарные архитектурные сооружения),Кулпытасы и койтасы,Саркофаги, каменные знаки и многие другие мемориальные объекты.Орнаменты, эпиграфика и символы на этих памятниках являются уникальными образцами камнерезного искусства в истории культуры и традиций казахского народа.     В 1977-1979 годах на территории некрополя были организованы исследовательские экспедиции, а с 1982 года он получил статус государственного охраняемого исторического памятника.В целом некрополь Сисем ата — духовный и исторический центр Мангистауского региона, одно из священных мест для народа.Это место считается важным источником для изучения археологии, этнографии и истории мемориальной архитектуры."},
+            {id: 13, name: "Мавзолей Омар-Тур", color: "#7AACD2", image:"Omar-Tur_Mausoleum.jpg", tags:["Купольный мавзолей","Духовная ответственность","Архитектурная традиция"],details: "Этот мавзолей расположен в Мангистауской области Казахстана, на территории Бейнеуского района.Точнее, находится примерно в 18–20 км к северо-востоку от села Бейнеу.Мавзолей был построен в XIX веке — в 1897 году.Его возвели известные мастера того времени — братья Омир и Дуйсен Каражусипулы.Мавзолей выполнен в купольной форме, при этом основной объём создаёт впечатление устремлённости вверх.Декоративные и внутренние элементы:Художественная резьба по камню выполнена с ювелирной точностью — это классический образец традиционного казахского прикладного искусства.На внешних поверхностях изображены различные предметы и их контуры — оружие, сапоги, самовар, пиала и другие.Внутренняя часть также оформлена в соответствии с внешним архитектурным стилем.Этот мавзолей в основном оценивается как священное место и небольшой мемориал — он был возведён для выражения уважения к историческим личностям, сохранения мастерства и традиций того времени.Он входит в историко-культурное наследие области и является важным местом для народа, проявляющего честь и духовную ответственность.В настоящее время этот мавзолей — интересное место для туристов и любителей истории.Хотя он входит в список культурного наследия Казахстана, некоторые источники указывают на необходимость его более глубокого изучения"},
+            {id: 14, name: "Алты-Кулаш аулие", color: "#7AACD2", image: "ффф.jpeg", tags:["Святое место","Место паломничества"], details: "Алты Құлаш әулие – один из широко известных в народе святых, к местам которого совершают паломничество в Казахстане.Сведения об этом святом в основном передаются через устные легенды и предания.Считается, что мавзолей Алты Құлаш әулие расположен на территории Мангистауской области.Этот регион очень богат святыми местами и подземными мечетями.По легендам, Алты Құлаш әулие — набожный человек, придерживавшийся суфийского пути, прославившийся среди народа своей справедливостью и даром предвидения.В некоторых преданиях говорится, что он был человеком очень высокого роста и крепкого телосложения.Поэтому ему дали имя «Алты Құлаш» (то есть, по смыслу — ростом примерно в шесть маховых саженей).Многие люди приезжают сюда:просить здоровья,просить потомства,совершать зиярат с намерением и молитвой.Мавзолей простой, но почитается как священное место.Чаще всего он сложен из камня.Рядом бывают места, предназначенные для ночлега и чтения Корана Паломники обычно здесь:Читают Коран,Просят исполнения желаний,Дают садака,Возносят молитвы за дух святого.Главное – приходить в это место с уважением и чистыми намерениями."},
+            {id: 15, name: "Кошкар Ата", color: "#7AACD2", image: "қошқарата.jpg", tags:["Мазар","Особенности старых обществ"], details:"Некрополь Кошкар-ата — широко известный историко-культурный памятник Мангистауской области. Он расположен примерно в 17 км к северо-западу от города Актау, недалеко от села Акшукур.В целом данный некрополь включён в список сакральных объектов историко-культурного и регионального значения. По результатам исследований на территории некрополя было зарегистрировано 81 памятник.Кроме того, местные жители и исторические сообщества оценивают это место как значимый исторический объект.На территории некрополя находятся древние памятники и исторические сооружения:мавзолеи и погребальные сооружения различных форм;надгробные камни и усыпальницы;некоторые памятники имеют уникальные украшения и символические знаки.Историческое значение некрополя:Это место считается неотъемлемой частью историко-культурного облика Мангистау. Подобные некрополи являются важным источником для изучения мировоззрения людей прошлых веков, их представлений о мире, традиционных верований, а также погребально-поминальных обрядов.Согласно отдельным преданиям, здесь в прежние века были похоронены люди, имевшие общественное, ритуальное или духовное значение. Однако точные исторические документы до сих пор полностью не изучены.В настоящее время на территории некрополя «Кошкар-ата» проводятся работы по уборке и субботники. Они организуются с целью сохранения исторического наследия и передачи его будущим поколениям.Некрополь является не только историческим памятником, но и местом, имеющим духовное значение для многих людей."},
+            {id: 16, name: "Алкакуль Аулие", color:"#7AACD2", image: "858BA8EB-D08A-48D4-8D3F-3D51D748D699.jpeg",tags:["Духовное наследие","Место совершения молитвы"], details:"Алкакуль аулие — святое место в Мангистауской области. Точное расположение обычно связывают с местностями неподалёку от аулов или в ущельях.Алкакуль аулие почитается в народе как святая личность. Хотя точные годы его жизни документально не подтверждены, по народным преданиям он жил в XVII–XVIII веках. Он был известен как религиозный наставник и провидец своего времени.Согласно народным верованиям, Алкакуль аулие обладал даром исцеления больных и силой молитвы. Люди, посещающие его захоронение, читают молитвы и просят исполнения желаний. Рядом с мавзолеем обычно находятся родники или небольшие водоёмы, которые считаются обладающими природной святостью.Сам некрополь небольшой, но пользуется особым почтением. Мавзолей простой, построен с использованием элементов местной архитектуры, чаще всего из камня или сырцового кирпича. Посетители приносят цветы, зажигают свечи или оставляют камни в знак уважения.Сегодня некрополь Алкакуль аулие является не только местом паломничества, но и считается духовным и культурным наследием Мангистау. Люди чаще всего приезжают сюда весной и летом, читают молитвы и проводят небольшие обрядовые мероприятия."},
+            {id: 17, name: "Долина Торыш", color: "#7AACD2", image: "торыш.jpg", tags:["Ущелье","Природа вызывающая особые чувства"], details:"Долина Торыш (Torysh) — это уникальный природный геологический феномен в Мангистауской области, известный под названием «Долина шаров». Здесь по степной равнине разбросаны сотни, а по некоторым оценкам — тысячи круглых камней шарообразной формы (конкреций), словно рассыпанные гигантские шары.Долина находится примерно в 100–110 км к северу от города Актау, недалеко от села Шетпе. Она расположена у северного подножия гор Каратау.Как образовались эти камни?Шарообразные камни в этой местности называются конкрециями. В науке считается, что они формируются естественным путём: минералы со временем наслаиваются вокруг какого-либо центра (например, фрагмента раковины или органических остатков). Со временем образования затвердевают и превращаются в очень прочные каменные шары.Размеры камней разные маленькие — 10–15 см;крупные — достигают 3–4 метров в диаметре.Конкреции разбросаны на площади в сотни квадратных километров. Подобные образования встречаются и в других частях света (например, камни Моераки в Новой Зеландии), однако мангистауские отличаются особенно крупными размерами.По оценкам учёных, возраст этих каменных шаров составляет примерно 40–60 миллионов лет и более. Они сформировались на дне древнего океана Тетис.Легенды и предания:О долине Торыш существуют и народные легенды:По одной из них, вражеское войско было обращено в камни, поэтому место считается священным.Другая легенда гласит, что это «шары», которыми играли великаны или божества.Эти истории не имеют научного подтверждения, но являются частью культурной мифологии региона.Туризм и посещение:Как добраться до Торыша:около 105 км от Актау — асфальтированная дорога;последние 7–8 км — грунтовая дорога, обычно требуется внедорожник (4×4).По пути отсутствуют сервисы, поэтому рекомендуется взять с собой воду, еду и при необходимости запас топлива.Торыш — это природная, неосвоенная территория. Здесь запрещается:разводить костры;раскалывать камни или оставлять надписи на них;оставлять мусор.Это помогает сохранить окружающую среду и даёт возможность будущим посетителям увидеть природу в её первозданном виде.На некоторых камнях видны трещины и слоистые структуры, образовавшиеся под воздействием погодных условий.Внутри отдельных конкреций иногда находят древние органические остатки и окаменелости."},
+            {id: 18, name: "Ущелье Саура", color: "#7AACD2", image: "саура.jpg", tags: ["Уникальная природа", "Своёобразная натура"],details:"Ущелье Саура — одно из уникальных природно-исторических мест Мангистауской области. Традиционно оно также воспринимается как территория, имеющая сакральное и духовное значение. Его часто называют долиной Саура или каньоном Саура. Расположено в Тупкараганском Ущелье Саура находится на территории Мангистауской области, в Тупкараганском районе.В 1993 году территория была взята под государственную охрану решением акимата Мангистауской области, а в 2018 году включена в государственный список историко-культурных памятников.Природные особенности Саура представляет собой природное углубление каньонообразного типа, окружённое высокими скалами.На дне каньона расположено небольшое прозрачное озеро с родниковой водой, берега которого покрыты зелёной растительностью и кустарниками.Это озеро считается местом обитания болотных черепах — редких представителей фауны региона.История и археология Вблизи ущелья обнаружены руины древнего укрепления — крепости Саура. По этому памятнику проводились археологические исследования.Bо время раскопок были найдены древние захоронения, керамическая посуда, железный нож, бусины и другие предметы. Эти находки подтверждают историческую значимость данной местности.Духовное значение и легендыО Сауре сохранилось множество народных преданий.В них рассказывается о связи человеческих судеб с природой этого места.Некоторые легенды приписывают озеру и самому ущелью духовную силу, а местную воду и природные объекты считают священными.Как добраться До ущелья Саура можно доехать на автомобиле из Актау или из Тупкарагана (в зависимости от состояния дорог). Местность расположена в пустынно-степной зоне, поэтому дорожные условия могут быть разными.Рекомендуется заранее уточнить маршрут у местных гидов или туристических компаний.Перед поездкой стоит запастись водой, едой и средствами защиты от солнца.О «сакральном» статусе Название Сауры как «сакрального» или «святого» места связано не с наличием официальных культовых сооружений, а с народными верованиями и легендами.Здесь нет действующей мечети или оформленного некрополя, однако благодаря необычной природе и археологическим находкам местность воспринимается многими людьми как особенная, а иногда и священная."},
+            {id: 19, name: "Мавзолей Барак Сатыбалды",color: "#7AACD2", image:"барақ.webp", tags: ["Мавзолей героя", "Традиционная архитектура"],details:"Мавзолей батыра расположен в 13 километрах к югу от села Тұрыш Бейнеуского района Мангистауской области. Памятник имеет прямоугольную форму и построен в соответствии с местными традиционными архитектурными образцами, стены выполнены в три слоя. Купольный мавзолей над могилой батыра Барака был возведён в 1993 году. Автор мавзолея — архитектор М. С. Нуркабаев.Барак Сатыбалдыулы (1743–1840) — батыр, один из руководителей национально-освободительного движения казахов Младшего жуза. Звание батыра Барак получил в возрасте 18 лет (1761 год) после победы в поединке над торгаутским батыром Алакобиком. До 70-х годов XVIII века он возглавлял отряды шомышты-табын и сражался с калмыками в междуречье Волги и Урала. В 1785–1792 годах он входил в число руководителей восстания против российского колониализма под предводительством Сырыма Датулы, о чём упоминается в письме О. Игельстрома императрице Екатерине II. Сопротивление батыра Барака способствовало ограничению насилия со стороны русских колонизаторов и сохранению казахских земель на правом берегу реки Урал. Он не допустил массового строительства военных укреплений на территории Западного Казахстана"},
+            {id: 20, name: "Мавзолей Бекбаулы Ата", color: "#7AACD2", image: "110288.jpg", tags: ["Символ духовности", "Целебное свойство"],details:""}
+            ];
+
+        const sitesGrid = document.querySelector('.sites-grid');
+        sitesData.forEach(site => {
+            const card = document.createElement('div');
+            card.className = 'site-card';
+            card.innerHTML = `
+                <div class="site-image" style="background: url(${site.image});background-position: center;
+    background-size: cover;">
+                    <div class="site-overlay">
+                        <div class="site-number">${site.id}</div>
+                        <h3 style="color:white;font-size:1.8rem;">${site.name}</h3>
+                    </div>
+                </div>
+                <div class="site-content">
+                    <h4>${site.name}</h4>
+                    <p>${getSiteDescription(site.id)}</p>
+                    <div class="site-tags">
+                        ${site.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <button class="btn btn-outline" onclick="showSiteDetails(${site.id})" style="margin-top:1rem;width:100%;border-color:${site.color};color:${site.color}">
+                        <i class="fas fa-eye"></i> Исследовать
+                    </button>
+                </div>
+            `;
+            sitesGrid.appendChild(card);
+        });
+
+        function getSiteDescription(id) {
+            const descriptions = [
+                "Первой остановкой пути является духовное посвящение. Сердце и разум очищаются.",
+                "Символ справедливости и разума. Внутренняя мудрость определяется.",
+                "Место, где можно почувствовать честность и чистоту сердца, проверить намерения..",
+                "Символ твердости и верности. Придерживайтесь цели.",
+                "Центр духовного образования и просвещения. Призывает к единству.",
+                "Ощущение героизма и защиты. Последняя остановка.",
+                "Перекрёсток духовного подвижничества и воинской доблести",
+                "Уникальная архитектурная мечеть, украшенная суфийским знанием.",
+                "Покровитель пути под открытым небом",
+                "„Огненная гора“ как знак почитания наследия предков",
+                "Уникальные памятники — свидетельство легенд и преданий. Истоки суфийского учения.",
+                "Высшее проявление культурной архитектуры. Образец уникального искусства.",
+                "Мавзолей почитания с особым значением для исторических личностей.",
+                "Единство чистоты души и благого намерения как проявление уважения.",
+            ];
+            return descriptions[id-1] || "Сакральное место Мангыстау.";
+        }
+
+        function showSiteDetails(siteId) {
+            alert(`Открывается детальная страница: ${sacredSites.find(s => s.id === siteId).name}`);
+            // Здесь будет переход на детальную страницу
+        }
+
+        function update3DViewer(siteId) {
+            const viewer = document.getElementById('model-viewer');
+            viewer.innerHTML = `
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;background:linear-gradient(45deg, #${(siteId*100+1000).toString(16)}, #${(siteId*150+1000).toString(16)});">
+                    <div style="text-align:center;">
+                        <i class="fas fa-monument" style="font-size:4rem;margin-bottom:1rem;"></i><br>
+                        3D модел: ${sacredSites.find(s => s.id === siteId).name}<br>
+                        <small style="opacity:0.8;">Используйте мышь для вращения</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Кнопка исследования
+        document.getElementById('exploreBtn').addEventListener('click', function() {
+            document.getElementById('map').scrollIntoView({behavior: 'smooth'});
+        });
+        function showSiteDetails(id) {
+            const details = document.getElementById(`details-${id}`);
+
+    
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+    } else {
+        details.style.display = 'none';
+     }
+          } 
+        // Инициализация простого 3D сцены (заглушка)
+        function init3DViewer() {
+            // Здесь будет код Three.js для реальных 3D моделей
+            console.log("3D Viewer инициализирован");
+        }
+
+        // Запуск при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            init3DViewer();
+            // Установка первого объекта как активного
+            highlightSiteItem(1);
+            update3DViewer(1);
+        });
+    </script>
+
+        <!-- Modal -->
+<div id="siteModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <img id="modalImage" alt="" />
+        <p id="modalText"></p>
+        <div id="modalTags"></div>
+    </div>
+</div>
+<script>
+    function showSiteDetails(id) {
+    const site = sitesData.find(s => s.id === id);
+    if (!site) return;
+
+    document.getElementById("modalTitle").innerText = site.name;
+    document.getElementById("modalImage").src = site.image;
+    document.getElementById("modalText").innerText = site.details;
+
+    document.getElementById("modalTags").innerHTML =
+        site.tags.map(t => `<span>${t}</span>`).join("");
+
+    document.getElementById("siteModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("siteModal").style.display = "none";
+}
+
+// Закрытие по клику вне окна
+window.onclick = function(e) {
+    const modal = document.getElementById("siteModal");
+    if (e.target === modal) modal.style.display = "none";
+};
+</script>
+
+    <!-- Modal -->
+<div id="siteModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <img id="modalImage" alt="" />
+        <p id="modalText"></p>
+        <div id="modalTags"></div>
+    </div>
+</div>
+<script>
+    function showSiteDetails(id) {
+    const site = sitesData.find(s => s.id === id);
+    if (!site) return;
+
+    document.getElementById("modalTitle").innerText = site.name;
+    document.getElementById("modalImage").src = site.image;
+    document.getElementById("modalText").innerText = site.details;
+
+    document.getElementById("modalTags").innerHTML =
+        site.tags.map(t => `<span>${t}</span>`).join("");
+
+    document.getElementById("siteModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("siteModal").style.display = "none";
+}
+
+// Закрытие по клику вне окна
+window.onclick = function(e) {
+    const modal = document.getElementById("siteModal");
+    if (e.target === modal) modal.style.display = "none";
+};
+
+</script>
+</body>
+</html>

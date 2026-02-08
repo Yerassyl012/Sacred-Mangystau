@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="kk,ru,en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mangystau Sacred Heritage | UNEARTHED FLL Project</title>
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500&display=swap" rel="stylesheet">
+    <!-- 3D Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Map Library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <style>
+        :root {
+            --primary: #2A5C82;
+            --secondary: #D4A76A;
+            --accent: #8B4513;
+            --light: #F5F1EA;
+            --dark: #1A2C3A;
+            --success: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .arabic-text {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            direction: rtl;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, #1A3A5A 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo-text span {
+            font-size: 1rem;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .language-switcher {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem;
+            border-radius: 10px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: var(--secondary);
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(rgba(42,92,130,0.9), rgba(26,44,58,0.9)), url('pattern.svg');
+            background-size: cover;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h2 {
+            font-size: 3.2rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .btn-primary:hover {
+            background: #E6B85C;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(212,167,106,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        /* Interactive Map Section */
+        .map-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            font-size: 1.1rem;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative;
+            border: 1px solid #ddd;
+        }
+
+        #heritage-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 1000;
+            width: 300px;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .site-list h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .site-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .site-item:hover {
+            background: #f0f7ff;
+            transform: translateX(5px);
+        }
+
+        .site-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .site-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .site-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* 3D Viewer Section */
+        .viewer-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .viewer-container {
+            display: flex;
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .viewer-3d {
+            flex: 1;
+            height: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            background: #1a1a1a;
+        }
+
+        #model-viewer {
+            width: 100%;
+            height: 100%;
+        }
+
+        .viewer-info {
+            flex: 1;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .viewer-info h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .viewer-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        /* Sites Grid */
+        .sites-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .site-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .site-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .site-image {
+            height: 220px;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .site-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .site-number {
+            background: var(--secondary);
+            color: var(--dark);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .site-content {
+            padding: 2rem;
+        }
+
+        .site-content h4 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .site-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag {
+            background: #eef7ff;
+            color: var(--primary);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* AR Section */
+        .ar-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #1A3A5A 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .ar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ar-phone-mockup {
+            position: relative;
+            width: 300px;
+            height: 600px;
+            background: #222;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border: 10px solid #111;
+        }
+
+        .ar-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ar-screen::after {
+            content: "👆 Наведите камеру";
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .ar-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .ar-info h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+            transform: translateX(5px);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #444;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .fll-badge {
+            background: #FF6B35;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .viewer-container, .ar-container {
+                flex-direction: column;
+            }
+            
+            .map-sidebar {
+                position: relative;
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+            
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+            }
+            
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                margin-top: 1.5rem;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .sites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 3000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    overflow: auto;
+}
+
+.modal-content {
+    background: white;
+    max-width: 700px;
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 20px;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 15px;
+    margin: 1rem 0;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #555;
+}
+
+#modalTags span {
+    display: inline-block;
+    margin: 5px 5px 0 0;
+    padding: 5px 12px;
+    background: #eef7ff;
+    border-radius: 20px;
+    color: var(--primary);
+    font-size: 0.85rem;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: scale(0.95);}
+    to {opacity: 1; transform: scale(1);}
+}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🏺</div>
+            <div class="logo-text">
+                <h1>Mangystau Sacred Heritage</h1>
+                <span>FLL UNEARTHED Project</span>
+            </div>
+        </div>
+        
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <nav class="nav-links" id="navLinks">
+            <a href="#map">Map</a>
+            <a href="objectives.html">Sites</a>
+            <a href="3d.html">3D Tour</a>
+            <a href="#ar">AR Mode</a>
+            <a href="#about">About</a>
+            
+            <div class="language-switcher">
+                <button class="lang-btn" data-lang="kk" onclick="window.open('kk.html', '_self')">Қаз</button>
+                <button class="lang-btn" data-lang="ru" onclick="window.open('index.html', '_self')">Рус</button>
+                <button class="lang-btn active" data-lang="en">Eng</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" data-aos="fade-up">
+        <h2 class="arabic-text"></h2>
+        <h2>Sacred Sites of Mangystau</h2>
+        <p>An interactive digital platform for preserving and exploring six sacred heritage sites of Western Kazakhstan. A First LEGO League project created under the UNEARTHED season theme.
+        </p>
+        
+        <div class="cta-buttons">
+            <button class="btn btn-primary" id="exploreBtn">
+                <i class="fas fa-map-marked-alt"></i> Explore the Map
+            </button>
+            <button class="btn btn-outline" id="virtualTourBtn" onclick="window.open('3d.html', '_self')">
+                <i class="fas fa-vr-cardboard"></i> Virtual Tour
+            </button>
+        </div>
+    </section>
+
+    <!-- Interactive Map -->
+    <section class="map-section" id="map" data-aos="fade-up">
+        <h2 class="section-title">Interactive Heritage Map</h2>
+        <p class="section-subtitle">Click on a marker to learn more about each sacred site of Mangystau</p>
+        
+        <div class="map-container">
+            <div id="heritage-map"></div>
+            
+            <div class="map-sidebar">
+                <div class="site-list">
+                    <h3><i class="fas fa-landmark"></i> 21 Sacred Sites</h3>
+<div class="site-item active" data-id="1">
+<div class="site-name">1. Shopan Ata</div>
+<div class="site-desc">Spiritual beginning, underground mosque</div>
+</div>
+<div class="site-item" data-id="2">
+<div class="site-name">2. Karaman Ata</div>
+<div class="site-desc">Justice and wisdom</div>
+</div>
+<div class="site-item" data-id="3">
+<div class="site-name">3. Kenti Baba</div>
+<div class="site-desc">Purity of heart, test of intentions</div>
+</div>
+<div class="site-item" data-id="4">
+<div class="site-name">4. Kuyeu Tam</div>
+<div class="site-desc">Mausoleum of loyalty and honesty</div>
+</div>
+<div class="site-item" data-id="5">
+<div class="site-name">5. Beket Ata (Oglandy)</div>
+<div class="site-desc">Spiritual knowledge and guidance</div>
+</div>
+<div class="site-item" data-id="6">
+<div class="site-name">6. Sultan Epe</div>
+<div class="site-desc">Courage and protection</div>
+</div>
+ </div>
+                    <div class="site-item" data-id="7">
+                        <div class="site-name">7. Masat Ata</div>
+                        <div class="site-desc"></div>Heroism and spiritual support</div>
+                    </div>
+ <div class="site-item" data-id="8">
+ <div class="site-name">8. Shakpak Ata</div>
+<div class="site-decs">A sacred and holy site</div>
+</div>
+<div class="site-item" data-id="9">
+<div class="site-name">9. Man Ata</div>
+<div class="site-desc">Protector of travelers</div>
+ </div>
+
+<div class="site-item" data-id="10">
+ <div class="site-name">10. Otpan Ata</div>
+ <div class="site-desc">Paying tribute to the spirits of the ancestors</div>
+</div>
+                        
+<div class="site-item active" data-id="11">
+<div class="site-name">11. Temir-Abdal</div>
+<div class="site-desc">Ancient and unique cemetery stones</div>
+</div>
+                    
+ <div class="site-item active" data-id="11">
+ <div class="site-name">12. Sisem Ata</div>
+  <div class="site-desc">A revered saint; structures from the Oghuz period</div>
+</div>
+
+ <div class="site-item active" data-id="11">
+ <div class="site-name">13. Omar-Tur Mausoleum</div>
+<div class="site-desc">A clear symbol of Kazakh handicrafts and traditions </div>
+ </div>
+
+ <div class="site-item active" data-id="11">
+ <div class="site-name">14. Alty Qulash Aulie</div>
+ <div class="site-desc">A respected and sacred place</div>
+</div>
+
+<div class="site-item active" data-id="11">
+<div class="site-name">15. Koshkar Ata</div>
+<div class="site-desc">A place of spiritual significance.</div>
+</div>
+                    
+<div class="site-item active" data-id="11">
+ <div class="site-name">16. Alkakul Aulie</div>
+<div class="site-desc">A spring-fed cemetery held in special reverence.</div>
+</div>
+
+<div class="site-item active" data-id="11">
+ <div class="site-name">17. Torysh Valley</div>
+ <div class="site-desc">An area rich in history.</div>
+</div>
+
+<div class="site-item active" data-id="11">
+<div class="site-name">18. Saura Gorge</div>
+ <div class="site-desc">A place of scenic nature and cherished memories.</div>
+</div>
+
+ <div class="site-item active" data-id="11">
+<div class="site-name">19. Baraq Satybaldyuly</div>
+ <div class="site-desc">A clear testament to heroism.</div>
+</div>
+
+ <div class="site-item active" data-id="11">
+ <div class="site-name">20. Bekbauly Ata</div>
+ <div class="site-desc">Hidden distinctiveness.A sign of bone-setting healing ability.</div>
+</div>
+
+ <div class="site-item active" data-id="11">
+<div class="site-name">21. Erjan Haziret</div>
+ <div class="site-desc">A special reverence for the past.</div>
+ </div>
+ </div>
+ </div>
+</div>
+</section>
+
+    <!-- 3D Viewer -->
+    <section class="viewer-section" id="3d" data-aos="fade-up">
+        <h2 class="section-title">3D Modeling of Sacred Sites</h2>
+        <p class="section-subtitle">Explore detailed 3D models of sacred places. Rotate, zoom, and examine them.</p>
+        
+        <div class="viewer-container">
+            <div class="viewer-3d">
+                <div id="model-viewer">
+                    <!-- 3D модель будет здесь -->
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;">
+                        <div style="text-align:center;">
+                            <i class="fas fa-sync fa-spin" style="font-size:3rem;margin-bottom:1rem;"></i><br>
+                            Loading 3D model...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="viewer-info">
+                <h3>Shopan Ata: Underground Mosque</h3>
+                <p>The first stop on the spiritual journey. A place of inner purification and endurance.</p>
+                
+                <div class="viewer-stats">
+                    <div class="stat">
+                        <span class="stat-number">XIV</span>
+                        <span class="stat-label">Century Built</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">12m</span>
+                        <span class="stat-label">Underground Depth</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">47°C</span>
+                        <span class="stat-label">Summer Temperature Inside</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Brick Preservation</span>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="width:100%;">
+                    <i class="fas fa-expand"></i> Fullscreen Mode
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sites Grid -->
+    <section class="sites-section" id="sites" data-aos="fade-up">
+        <h2 class="section-title">21 Sacred Sites</h2>
+        <p class="section-subtitle">Each place has a unique spiritual significance and historical value
+        <div class="sites-grid">
+            <!-- Карточки будут сгенерированы JavaScript -->
+        </div>
+    </section>
+
+    <!-- AR Section -->
+    <section class="ar-section" id="ar" data-aos="fade-up">
+        <h1 style="font-size: 55px;">Augmented Reality (AR)</h1>
+        <p style="font-size: 20px;">Use your smartphone camera to bring historical sites to life</p>
+        
+        <div class="ar-container">
+            <div class="ar-phone-mockup floating">
+                <div class="ar-screen">
+                    <i class="fas fa-monument"></i>
+                </div>
+            </div>
+            
+            <div class="ar-info">
+                <h3>AR Heritage Guide</h3>
+                <p>Point your camera at a marker or QR code to see a 3D model of the site in your environment. Ideal for education and virtual excursions.</p>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-outline" style="border-color:white;color:white;">
+                        <i class="fas fa-qrcode"></i> Scan QR Code
+                    </button>
+                    <button class="btn btn-primary" style="margin-left:1rem;">
+                        <i class="fab fa-google-play"></i> Download the App
+                    </button>
+                </div>
+                
+                <div class="fll-badge">
+                    <i class="fas fa-robot"></i> FLL Innovation Award Candidate
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="about">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Mangystau Sacred Heritage</h4>
+                <p>Project First Lego League 2025-2026. Season theme: UNEARTHED.</p>
+                <p>Team: Infinite Intelegence</p>
+                <div style="margin-top:1rem;">
+                    <i class="fas fa-users" style="margin-right:0.5rem;"></i>
+                    <strong>Members:</strong> Miras, Darkhan, Zhankozha, Aisun, Aqtolqyn, Akzhurek, Shakarim
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <div class="footer-links">
+                    <a href="#map"><i class="fas fa-map"></i> Interactive Map</a>
+                    <a href="#3d"><i class="fas fa-cube"></i> 3D Models</a>
+                    <a href="#ar"><i class="fas fa-mobile-alt"></i> AR Mode</a>
+                    <a href="#about"><i class="fas fa-info-circle"></i> About the Project</a>
+                    <a href="#resources"><i class="fas fa-book"></i> Educational materials</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Contacts</h4>
+                <p><i class="fas fa-envelope"></i> fll.mangystau@edu.kz</p>
+                <p><i class="fas fa-school"></i> Қадам мектеп-лицейі, Mangystau</p>
+                <p><i class="fas fa-trophy"></i> FIRST LEGO League Challenge</p>
+                
+                <div style="margin-top:1.5rem;">
+                    <i class="fas fa-hashtag" style="color:var(--secondary);margin-right:0.1rem;"></i>
+                    <strong>Hashtags:</strong> #FLL #UNEARTHED #Mangystau #CulturalHeritage
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>© 2025 Infinite Intelegence Team. All rights reserved. | Project created to preserve Kazakhstan’s cultural heritage.</p>
+            <p>FIRST®, LEGO®, FIRST LEGO League™ are trademarks of their respective owners.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Инициализация AOS анимаций
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // Мобильное меню
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        // Переключение языка
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const lang = this.dataset.lang;
+                // Здесь будет логика перевода контента
+                console.log('Переключение на язык:', lang);
+            });
+        });
+
+        // Инициализация карты Leaflet
+        const map = L.map('heritage-map').setView([43.5, 52.0], 7);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Данные о сакральных местах
+        const sacredSites = [
+            {id: 1, name: "Shopan Ata", lat: 43.8, lng: 51.2, desc: "Spirituality"},
+            {id: 2, name: "Karaman Ata", lat: 43.9, lng: 52.1, desc: "Justice and Wisdom"},
+            {id: 3, name: "Kenti Baba", lat: 44.2, lng: 52.5, desc: "Purity of heart"},
+            {id: 4, name: "Kuyeu Tam", lat: 43.6, lng: 51.8, desc: "Loyalty"},
+            {id: 5, name: "Beket Ata (Oglandy)", lat: 43.3, lng: 52.6, desc: "Spiritual knowledge"},
+            {id: 6, name: "Sultan Epe", lat: 43.0, lng: 51.5, desc: "Bravery and protection"}
+        ];
+
+        // Добавление маркеров на карту
+        sacredSites.forEach(site => {
+            const marker = L.marker([site.lat, site.lng])
+                .addTo(map)
+                .bindPopup(`<b>${site.name}</b><br>${site.desc}<br><button onclick="showSiteDetails(${site.id})" style="margin-top:10px;padding:5px 10px;background:var(--primary);color:white;border:none;border-radius:5px;cursor:pointer;">Подробнее</button>`);
+            
+            marker.on('click', function() {
+                highlightSiteItem(site.id);
+            });
+        });
+
+        // Подсветка выбранного объекта в сайдбаре
+        function highlightSiteItem(siteId) {
+            document.querySelectorAll('.site-item').forEach(item => {
+                item.classList.remove('active');
+                if(parseInt(item.dataset.id) === siteId) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Обработчики для сайдбара
+        document.querySelectorAll('.site-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const siteId = parseInt(this.dataset.id);
+                const site = sacredSites.find(s => s.id === siteId);
+                if(site) {
+                    map.setView([site.lat, site.lng], 10);
+                    highlightSiteItem(siteId);
+                    update3DViewer(siteId);
+                }
+            });
+        });
+
+        // Генерация карточек объектов
+        const sitesData = [
+            {id: 1, name: "Shopan Ata", color: "#2A5C82", image: "ysh_9503-1.jpg", tags: ["Underground mosque", "Spirituality", "XIV century"],details: "Shopan Ata Underground Mosque.It is located in the Mangystau region, about 30–35 km from the city of Aktau, inside a rocky hill.Who was Shopan Ata?Shopan Ata is considered the spiritual patron of shepherds and livestock herders. He is known as a holy figure who helped spread Islam. Among the people, he is remembered as a sacred person who prayed for the safety of livestock and brought prosperity and well-being to the community.The mosque is believed to date back to the 10th–11th centuries. It is considered one of the oldest underground mosques in Mangystau and is connected with the early spread of Islam in the region.Architectural features:The mosque was carved out of solid chalk rock. The underground structure consists of several rooms, including:a prayer hall;small niches for worship;openings in the ceiling for air circulation.Due to natural conditions, it stays cool in summer and warm in winter, with well-preserved natural ventilation.Near the mosque there is a large necropolis. The cemetery contains ancient gravestones and cauldron-shaped stone markers. This area is believed to have been an important religious center in the past.Legends and beliefs:Shopan Ata was believed to be a protector of livestock, especially sheep.He was said to pray for rain during times of drought.Local people deeply respected him as a sacred figure.Today, the site is protected by the state. It is an important historical and spiritual monument of Mangystau, visited by both pilgrims and tourists."},
+            {id: 2, name: "Karaman Ata", color: "#3A6C92", image: "4-120x90.jpg", tags: ["Justice", "Wisdom", "Artifacts"],details:"Mangystau Region, Mangystau District. It is located in a rocky, arid steppe area. There is a unified complex together with a necropolis nearby.Who was Karaman Ata?Karaman Ata was a holy man who preached Islam. Among the people, he was known as a fair, pious teacher devoted to the path of religion. He preached faith and unity to the people.The mosque was built between the 12th–13th centuries. Its construction period corresponds to the time when Islam began to spread widely in Mangystau.The mosque was carved out of natural chalk rock. It consists of several rooms: a place for prayer and rooms for students. There are simple carvings on the walls.Since the mosque is underground, the temperature remains stable. The natural ventilation system has been preserved.Near the Karaman Ata mosque there is an ancient necropolis with gravestones, and Arabic inscriptions can be found on the gravestones. The necropolis is important as a historical source.The Karaman Ata mosque was a place where religious education and upbringing were given.Many people come here for pilgrimage and spiritual purification.Legends:Karaman Ata was known for his fairness, and there is a belief that he settled disputes among the people.Today the mosque is protected by the state. It is still being studied and preserved. This mosque has been included in tourist routes."},
+            {id: 3, name: "Kenti Baba", color: "#4A7CA2", image: "images.jpeg", tags: ["Purity of heart", "Nakmereniya", "Ceramics"],details:"Kenti Baba Necropolis — located in the Mangystau Region, in the northeastern part of the Tupkaragan Peninsula. It lies between the villages of Shetpe and Shair, near the Samal Gorge and the Sultan Upi underground mosque.Name and meaning:The name “Kenti Baba” in the Kazakh language is close in meaning to “sacred, great ancestor.” There is an opinion that the person buried here may have been a respected saintly figure, but there are no exact historical records.The necropolis contains burials of people who lived between the 10th and 16th centuries. In total, there are more than 130 monuments (gravestones and ancient mausoleums). Ancient burial rituals and historical or religious traditions took place at this site.Architecture of the necropolis:Kenti Baba is a complex necropolis that includes:ancient mausoleums;small gravestones;stones decorated with images of animals, livestock, and ornaments.Features of the mausoleums:Several important mausoleums are located together.Inside one of them, boards with argali horns placed at the head are found, which is considered a sign of sainthood.Some stones feature images of people, animals, horses, camels, plants, geometric patterns, and handprints.According to legend:There is a belief that Kenti Baba was a saint and a religious person.The necropolis is called a “city of the dead,” as many people were buried here over a long period of time.Some believe this place has spiritual power, so people come here to make wishes.The necropolis was included in the state register in 2018 and is protected as a memorial reserve. It is often shown during excursions and tours."},
+            {id: 4, name: "Kuyeu Tam", color: "#5A8CB2", image: "КүйеуТам.jpg", tags: ["Loyalty", "Architecture"],details: "Küyеуtam (Küyеу Tam) — a historical site in Mangystau.This is not a mosque, but the name of a sacred place, a burial site, and the name of an area. There are not many written records about a specific historical building there, but there is an interesting story behind the origin of its name.The site is described as an area in the Mangystau region, located about 5–6 km from the village of Ondy.Name and meaning:“Küyеуtam” literally sounds close to “a sacred tomb (or house) related to a groom/son-in-law.”There are no exact historical records, but among local place names it is connected with an event preserved in folk memory:It is said that Olzha’s daughter and her husband, along with a man named Kalmatay, died tragically while fleeing persecution, and their graves remained in this area.In the account it is said:“…Olzha’s daughter and her husband, and a man named Kalmatay, were killed while being pursued. Today their graves are located here, about 3–4 km apart from each other…”Therefore, this name is believed to be connected with legend and a historical event."},
+            {id: 5, name: "Beket Ata (Oglandy)", color: "#6A9CC2", image: "5-120x90.jpg", tags: ["Spiritual knowledge", "Education", "Manuscripts"],details: "Location: Mangystau Region, Karakiya District, Ogylandy Valley, located inside a high rock cliff.Who was Beket Ata?Full name: Beket Myrzagululy (1750–1813).He was a great Kazakh saint, religious educator, batyr (warrior), and teacher. Among the people, he was known as a visionary, a wise man, and a person possessing miracles.The mosque is said to have been built at the end of the 18th century. It was carved by Beket Ata himself. Beket Ata built four mosques in Mangystau, and the last one is this mosque in Ogylandy.Architectural features:It was carved from chalk rock and is located entirely underground. The mosque consists of four rooms:1. A prayer room.2. A room where religious lessons were give.3. A place for guests.4.	The room where Beket Ata is buried.Natural features:It remains cool in summer and warm in winter, has special openings for air circulation, and niches that allow natural light inside.Religious and spiritual significance:It was a center for spreading Islam through the Sufi path.Students were educated here.It is a sacred place where people make wishes and prayers.It is considered “a place blessed by spirits.”Legends:Beket Ata is believed to have protected the people from enemies and healed the sick.Many people say that after visiting his mosque with sincere intention, they find spiritual peace.Current status:It is protected by the state.It is one of the most sacred pilgrimage sites in Kazakhstan.Thousands of people visit every year.It is both a tourist and spiritual center."},
+            {id: 6, name: "Sultan Epe", color: "#7AACD2", image: "СұлтанЕпе.jpeg", tags: ["Bravery", "Defense", "Mazar"],details: "Underground mosque located in the Mangystau Region, on the Tupkaragan Peninsula, near the Caspian Sea.Who was Sultan Epe?Sultan Epe was a holy figure and a preacher of Islam. According to popular belief, he is the patron of sailors and the protector of travelers. He was a saint who promoted faith and patience among the people.Period of construction: 14th–15th centuries — the time when Islam became firmly established in Mangystau.Architectural features:The mosque was carved into rocky stone. Inside there is a worship room and niches for placing lamps. The structure is simple but strong. The mosque remains cool in summer and warm in winter, with natural ventilation preserved.Before going out to sea, people would come here to make pilgrimage and pray for a safe journey. The underground mosque has been respected as a sacred place.There is a belief that Sultan Epe helped people lost at sea and protected ships from disasters."},
+            {id: 7, name: "Masat Ata", color: "#7AACD2", image: "masat-ata1.jpg", tags: ["Sacred site", "Historical heritage"],details: "Who was Masat Ata?Masat Ata is described as a person who came to Mangystau from Mashhad (in present-day Iran) and spread Islam. He is also regarded as a batyr who defended his people and land from enemies.Legends and myths.According to legends:He had a special ability to withstand weapons like swords and arrows, and enemy bullets could not harm him.His enemies tried to learn his weak point through his wife. In the end, they attacked him during the dawn prayer and beheaded him.This story became a historical legend, and the land of Masat Ata came to be regarded as a sacred place.About the Masat Ata necropolis and mosque.The Masat Ata funerary complex is a historical necropolis (a group of graves) and an underground mosque. It is located in the Mangystau region, about 25 km south of the village of Ushtagan.Main features.Necropolis: A historical cemetery consisting of graves and gravestones dating from the 14th–18th centuries.Underground mosque: A religious structure carved from stone, with an interior shaped like a yurt and an opening in the ceiling that allows sunlight inside.The entrance corridor is oriented toward Mecca.The necropolis and mosque were taken under state protection in 1982, and later scientific restoration work was carried out.Today, the Masat Ata site is preserved as an official historical and cultural monument (included in the state register). It is considered a sacred place visited by both tourists and pilgrims.In short, Masat Ata is a legendary religious-historical figure of Mangystau, and the necropolis and underground mosque associated with his name form a heritage site rich in Islamic history, local legends, and cultural significance."},
+            {id: 8, name: "Shakpak Ata", color: "#7AACD2", image: "aappaa.jpg", tags: ["Underground mosque", "Architecturally significant place"],details: "Location of the mosque: Tupkaragan Peninsula, inside a high rock cliff.Who was Shakpak Ata?Shakpak Ata was a saint, a teacher, and a Sufi who spread Islam.Period of construction: 10th–12th centuries. It is considered one of the oldest mosques in Mangystau.The mosque has a very complex structure. It was built with a cross-shaped plan. The underground mosque consists of a central hall and rooms extending in four directions.On the mosque walls there are:ornaments,tribal signs (tamgas),and Arabic inscriptions.This mosque is a unique example of architectural art. The technology used to create the four-room mosque carved into the rock does not resemble other similar structures. The mosque was made as an artificial cave inside the rock, and its inner rooms extend from the central hall toward the north, south, west, and east.The interior of the mosque and its doorways are richly decorated, and the ornaments were painted with long-lasting paints. The central hall is designed with arches that stand out from the rock layers and connect to columns with upper sections, forming a spherical dome. Traces of decorative craftsmanship are preserved on the arches. From the stone top of the dome, a well-like opening was carved to let light in.On the outside, above the light opening, a small architectural structure with four arched openings was built. The main entrance of the mosque is shaped like a triangular arch. On both sides of the entrance doorway, many burial remains are preserved in specially made niches.Religious education was given at the Shakpak Ata mosque. This place was a center of Sufi teaching."},
+            {id: 9, name: "Man Ata", color: "#7AACD2", image: "Маната.jpeg", tags: ["Sacred land", "Legendary","Sufi teachings"],details: "Man Ata is a figure who holds a special place in the legends, folklore, and traditional beliefs of Mangystau. There are no historical documents about his real biography, but according to local legends and some studies, he is described as a great teacher or prophet of ancient humanity.In some stories, he is portrayed as the “first human” or the ancestor of all people. Narratives about Man Ata are also found in the oral traditions of Zoroastrianism, where he is mentioned as a prophet who spread wisdom and spiritual knowledge. According to legend, he taught humanity laws, order, and spiritual teachings, and for this reason his name appears in several cultures around the world.The Man Ata Mausoleum is a sacred site located on the Ustyurt Plateau in Mangystau. It is respected by local people as the burial place of Man Ata or a site connected with his legend.Today, parts of a memorial structure remain at this location, but it has not been fully restored and stands in the open air. On the walls of the mausoleum there is a marked place with an inscription about Man Ata, and the surrounding stones and passes are considered sacred points by local people.Legend and tradition.Connection between Man Ata and Adam Ata:In some local folk narratives, the name “Man Ata” is associated with the concept of “Adam Ata” (Father Adam), and he is described as a representation of the first human. According to this understanding, the word man may carry an ancient meaning related to “human,” and Man Ata is viewed as a spiritual origin of humanity.Man Ata is not confirmed as a real historical person, but rather as a legendary and mythological figure."},
+            {id: 10, name: "Otpan Tau", color: "#7AACD2", image: "отпантау.jpg", tags: ["Impressive place", "Impressive place, Historical"],details: "Otpan Mountain is a unique geographical site with historical and cultural significance located in the Mangystau Region of Kazakhstan. It is the highest point of the Western Karatau ridge. Its name in Kazakh means “Mountain of Fire” or “Mountain Born of Fire” (the word otpan is related to fire). In historical times, it served as an important symbol of unity and a warning signal against enemies.Location: Mangystau Region, Mangystau District (Mangyshlak Peninsula).The height of Otpan Mountain is approximately 532 meters (some sources mention about 540 m). It is the highest point of the Western Karatau range.Historical and cultural significance:Since ancient times, Otpan Mountain has been known as a place where signal fires were lit to warn the people of approaching danger.In 2007, the “Adai Ata – Otpan Mountain” historical and cultural complex was opened at the summit. The complex represents the historical, spiritual, and cultural heritage of the region.Main sites of the complex.1.Mausoleum of Adai Ata (Aksarai)Built at a height of 37 meters on the elevated part of the mountain, Aksarai is a mausoleum dedicated to Adai Ata and his descendants.2.Two stela-minarets.On both sides of the mausoleum stand stelae dedicated to Adai Ata’s two sons — Kudaike and Kelimberdi.3.15-meter statue of a Mother.Built as a tribute to all mothers.4.Wolf (Kokbori) statue.A symbol of strength and freedom.5.Fire of Unity site.A place where the ceremonial flame is lit during the Amal (Korisu) holiday.7.Museum.The museum within the complex displays historical, ethnographic, and religious artifacts of Mangystau, as well as documents and genealogies of tribes and clans.7.362 steps.There are 362 steps leading from the foot of the mountain to the summit.Every year, the Amal (Korisu) celebration is held at the “Adai Ata – Otpan Mountain” complex, where the Fire of Unity is lit as a symbol of national unity and respect for ancestral spirits."},
+            {id: 11, name: "Temir Abdal", color: "#7AACD2", image: "темірабдал.jpg", tags: ["Religious education", "Unique necropolis"],details: "Temir Abdal — Underground Mosque.The “Temir Abdal” underground mosque is one of the ancient underground mosques located in the Mangystau region.Location:According to researchers’ estimates, the mosque is situated west of Sherkala Mountain, about 20 km from the village of Satpe and approximately 170 km from Aktau city.Who was Temir Abdal? Historians and researchers believe that the mosque may have been built by a man named Temir, who likely belonged to the Abdal clan. The Abdal were possibly an ancient clan or religious community in Mangystau. Temir Abdal himself may have been a religious teacher and educator. However, there are very few historical documents about him, so most information is based on scholarly hypotheses.Architecture and features:The mosque is carved underground. Initially, it consisted of two rooms. Later, the ceiling of one room collapsed. The remaining room has no window openings; light enters from below. It is believed that this place was built centuries ago as a site for religious teaching or worship.Necropolis (Mazar):Next to the Temir Abdal underground mosque, there is a necropolis containing unique ancient stone graves called Koytas and Saganatam:Koytas – stone graves decorated with images of calves or sheep.Saganatam – stone graves with columns at the corners, enclosed by stone.These types of stones are unique monuments that can also be found at other historical sites in Mangystau.How to reach:The mosque is most easily reached from the west side of Sherkala Mountain. Visitors can travel by vehicle and then continue on foot, or join local tours. Many tours in the region include several underground mosques and other historical sites.Interesting facts:The ancient cemetery stones next to the Temir Abdal mosque are not only unique in Mangystau but are also considered evidence of local legends, myths, and history."},
+            {id: 12, name: "Sisem Ata", color: "#7AACD2", image: "sisem-ata.jpg", tags: ["Domed tombs", "Memorial site"],details: "Sisem Ata Necropolis.Sisem Ata is located about 30–35 km north of the village of Say-Utes, in the western part of the Ustyurt Plateau.The Sisem Ata necropolis developed between the 13th and 19th centuries. It is a cultural monument complex of historical significance, starting from the medieval period. The site contains graves and structures dating from the Oghuz-Turkmen era up to the early 20th century.Legend:According to local legend, Sisem Ata was a religious leader and preacher of Islam who lived in the region. The necropolis is said to have been named in his honor.Types of monuments and architecture:The necropolis features various architectural forms, including:Domed tombs (approximately 22)Saganatams (stationary architectural structures)Gravestones and koytas.Sarcophagi, stone markers, and many other memorial structures.The carvings, inscriptions, and symbols on these monuments represent a unique example of Kazakh stone-carving art, reflecting the cultural and traditional history of the people:Research and protection:Expeditions to study the necropolis were organized between 1977 and 1979. Since 1982, it has been a state-protected historical monument.Overall, the Sisem Ata necropolis is a spiritual and historical center of the Mangystau region and one of the sacred places for the local population. It is an important source for studying archaeology, ethnography, and the history of memorial architecture."},
+            {id: 13, name: "Omar-Tur Mausoleum", color: "#7AACD2", image: "Omar-Tur_Mausoleum.jpg", tags: ["Domed mosque", "Spiritual responsibility","Traditional architecture"],details: "This mausoleum is located in the Beineu District of Mangystau Region, Kazakhstan, about 18–20 km northeast of the village of Beineu.The mausoleum was built in the 19th century, in 1897, by the famous master craftsmen Ömir and Düysen Karajüsipuly. It is constructed as a domed structure, with the main volume designed to give the impression of rising upwards.Decorative and interior elements:Artistic stone carvings are crafted with precision, representing a classical example of traditional Kazakh craftsmanship.The exterior features various depictions and motifs, including weapons, boots, a samovar, a cup, and more.The interior is decorated in harmony with the exterior architectural style.The mausoleum is considered a sacred place and a small memorial, built to honor historical figures and preserve the craftsmanship and traditions of that period. It is part of the region’s historical and cultural heritage and holds significance for people who value honor and spiritual responsibility.Today, the mausoleum is a place of interest for tourists and history enthusiasts. While it is included in the list of Kazakhstan’s cultural heritage sites, some sources indicate that further in-depth research is needed."},
+            {id: 14, name: "Alty Qulash Aulie", color: "#7AACD2", image: "ффф.jpeg", tags: ["Sacred place", "Pilgrimage site"],details: "Alty Qulash Aulie is one of the sacred sites in Kazakhstan widely respected and visited by people. Most information about this saint comes from oral legends and folklore.The Alty Qulash Aulie mausoleum is said to be located in the Mangystau Region, an area rich in saints, prophets, and underground mosques.Legend:According to local stories, Alty Qulash Aulie was a devout and pious person who followed the Sufi path. He was known for his justice and spiritual insight. Some accounts describe him as a tall and large-bodied man, which is why he was called “Alty Qulash” — meaning roughly “six arms’ length” in height.Pilgrimage and Significance.Many visitors come to this site to:Pray for health.Ask for children.Make wishes and offer prayers.The mausoleum is simple but revered as a holy place. It is mostly made of stone and includes areas for staying overnight and reading the Qur’an.Visitors typically:Recite the Qur’an,Make prayers and wishes,Give charity.Dedicate prayers to the saint’s spirit.              Important: People are expected to approach the site with respect and pure intentions."},
+            {id: 15, name: "Koshkar Ata", color: "#7AACD2", image: "қошқарата.jpg", tags: ["Mausoleum", "Features of ancient communities"],details: "Koshkar Ata Necropolis is a widely recognized historical and cultural monument in the Mangystau Region. It is located approximately 17 km northwest of Aktau, near the village of Akshukyr.This necropolis is included in the list of sacred sites with historical, cultural, and regional significance. Research has recorded 81 monuments within the necropolis. Additionally, local residents and historical societies regard the site as an important historical location.Monuments and features at the necropolis:Mausoleums and burial structures of various forms.Gravestones and small mausoleums.Some monuments feature unique decorations and inscriptions.Historical significance:The Koshkar Ata necropolis is considered an integral part of Mangystau’s historical and cultural landscape. Such sites are valuable sources for studying the worldview, beliefs, and burial practices of past generations. According to some sources, the necropolis preserves legends that people of high social, ritual, or spiritual importance were buried here, though detailed historical documentation is still incomplete.Today, cleaning and maintenance activities are carried out at the Koshkar Ata necropolis to preserve the site and pass it on to future generations. The necropolis is not only a historical monument but is also considered a spiritually significant place by many people."},
+            {id: 16, name: "Alkakul Aulie", color: "#7AACD2", image: "858BA8EB-D08A-48D4-8D3F-3D51D748D699.jpeg", tags: ["Spiritual heritage", "Place for prayer"],details: "Alkakul Aulie – located in the Mangystau Region, usually near villages or in gorges.Alkakul Aulie is recognized by the people as a sacred figure. Although the exact dates of his life are not confirmed, local legends suggest that he lived during the 17th–18th centuries. He was known in his time as a religious teacher and a seer.According to popular belief, Alkakul Aulie had the power to heal illnesses and accept prayers. People visiting his necropolis perform prayers and make wishes. Around the mausoleum, there are often streams or springs considered to have natural sacred qualities.The necropolis is small but highly respected. The mausoleum is simple, built with local architectural elements, usually from stone or clay. Visitors honor the site by leaving flowers, candles, or stones.Today, the Alkakul Aulie necropolis is not only a place for pilgrimage but also recognized as part of Mangystau’s spiritual and cultural heritage. People usually visit in spring or summer, perform prayers, and hold small ceremonial events."},
+            {id: 17, name: "Torysh Valley", color: "#7AACD2", image: "торыш.jpg", tags: ["Valley", "Nature that evokes special feelings"],details: "Torysh Valley — also known as the “Valley of Balls,” is a unique natural geological phenomenon located in the Mangystau Region, near Aktau and the Shetpe district. The area is covered with hundreds — and according to some accounts, thousands — of round, spherical stones called concretions, scattered across the landscape.The valley is about 100–110 km north of Aktau, near the village of Shetpe, close to the northern slopes of the Karatau Mountains.How did the stones form?These spherical stones are natural concretions. Geologically, they form over time as minerals accumulate layer by layer around a central object, such as shells or organic remains. Over millions of years, they harden into solid, often perfectly round stones. The stones vary in size, from 10–15 cm for smaller ones to 3–4 meters for the largest.The concretions are spread over hundreds of square kilometers. Similar formations exist elsewhere in the world, such as the Moeraki Boulders in New Zealand, but the ones in Mangystau are especially large.Age:Scientists estimate the stones to be 40–60 million years old or older, originally formed at the bottom of the ancient Tethys Sea.Legends and myths:Local folklore gives these stones mystical stories:One legend says they are enemies turned to stone, which makes the site sacred.     Another story claims the stones are “balls” thrown by gods or giants.While these legends are not scientifically proven, they are part of the region’s cultural mythology.Tourism and visiting:Distance from Aktau: ~105 km by paved road, followed by 7–8 km of dirt track, usually requiring a 4×4 vehicle.There are no services along the way — visitors should bring water, food, and fuel.The area is natural and undeveloped: fires, breaking or carving stones, and leaving trash are strictly prohibited to preserve the environment.Interesting facts:Some stones have thin cracks and layers formed naturally by weathering.Occasionally, fossils or traces of ancient organisms can be found inside some stones.Torysh Valley is a remarkable combination of geological wonder, natural beauty, and local legend, making it one of Mangystau’s most fascinating attractions."},
+            {id: 18, name: "Saura Gorge", color: "#7AACD2", image: "саура.jpg", tags: ["Unique nature", "Distinctive beauty"],details: "Saura Gorge is one of the unique natural and historical sites of the Mangystau region. It is also traditionally regarded by some as a sacred place with spiritual significance. The area is often referred to as Saura Valley or Saura Canyon and is located in the Tupkaragan District.Location and Protection Status:Saura Gorge is situated in the Mangystau Region, within the Tupkaragan District.In 1993, the area was taken under state protection by a decision of the Mangystau regional administration. Later, in 2018, it was included in the official list of state-protected historical and cultural monuments.Natural Features:Saura is a natural canyon-like depression surrounded by high rocky cliffs.At the bottom of the canyon there is a small, clear waterfall lake, and its surroundings are covered with green vegetation and shrubs.This lake is known as a habitat for marsh turtles, which are considered rare animals.History and Archaeology:Near Saura Gorge, the ruins of an ancient Saura fortress have been discovered. Archaeological research has been conducted at this site.During these studies, ancient burials, pottery fragments, an iron knife, beads, and other artifacts from earlier historical periods were found. These discoveries show that the area has significant historical value.Spiritual Meaning and Legends:There are many local legends connected with Saura.Stories are told about the connection between human destiny and nature in the history of this place.Some legends say that Saura Lake and the gorge have spiritual meaning, and the water and nature of the area are sometimes considered sacred.How to Get to Saura:Saura Gorge can be reached by car from Aktau and from Tupkaragan, depending on road conditions. The area is located in a desert-steppe zone, so road quality may vary. (It is best to check exact routes with local guides or travel agencies.)Visitors are advised to bring enough water, food, and sun protection before traveling to the area.What is Known About the “Saura Cemetery” or Sacred Status?The name “Saura cemetery” or “sacred place” is not connected to an official religious site. Instead, it is based on traditional beliefs and local legends.There is no mosque or formal burial ground here, but because of its unusual nature and the discovery of historical artifacts, many people consider this place special and sometimes sacred."},
+            {id: 19, name: "Baraq Satybaldyuly", color: "#7AACD2", image: "барақ.webp", tags: ["Hero’s mausoleum", "Traditional architecture"],details: "The mausoleum of the batyr is located 13 kilometers south of Turysh village in Beineu District, Mangystau Region. The monument has a rectangular shape and was built in accordance with local traditional architectural styles, with walls constructed in three layers. A domed mausoleum was erected over the grave of Barak Batyr in 1993. The author of the mausoleum is architect M. S. Nurkabayev.Barak Satybaldyuly (1743–1840) was a batyr and one of the leaders of the national liberation movement of the Junior Zhuz Kazakhs. Barak earned the title of batyr at the age of 18 (1761) after defeating the Torghut warrior Alakobik in a single combat. Until the 1770s, he led the Shomyshty-Tabyn troops in battles against the Kalmyks between the Volga and the Ural rivers.From 1785 to 1792, he was among the leaders of the uprising against Russian colonial rule led by Syrim Datuly. This is mentioned in a letter written by O. Igelstrom to Empress Catherine II. Barak Batyr’s resistance actions helped restrain the violence of Russian colonizers and contributed to preserving Kazakh lands on the right bank of the Ural River. He also prevented the large-scale construction of military fortresses in the territories of Western Kazakhstan."},
+            {id: 20, name: "Bekbauly Ata", color: "#7AACD2", image: "110288.jpg", tags: ["Symbol of faith", "Bone-setting (healing) ability"],details: "Beket Ata highly valued Bekbauly Ata, who was a healer, clairvoyant, and bonesetter, yet even today there is still insufficient information about him. The first reason for this is that during his lifetime he deliberately avoided praise and admiration, did not wish his fame to be widely publicized, dressed modestly without extravagance, avoided drawing attention, and lived a very humble life. More precisely, this reflects his strong human qualities and personal modesty. The second reason lies in the lingering influence of past times, when such profound concepts as “faith, religion, prayer, mullah, and saint” were not openly discussed but instead kept deep within one’s heart.No written records about Bekbauly Monshauly have been preserved. However, according to elderly eyewitnesses and well-known Mangystau genealogists such as A. Mendaliev, it is assumed that he was born along the Syr Darya region between 1750 and 1756. From the age of seven, Bekbauly was believed to be accompanied by ancestral spirits. While calmly drinking tea, he would suddenly hear that someone’s leg was hurting or another person’s arm had been broken, rush off immediately, and soon return after setting the bones.As he grew older, Bekbauly Ata received education from the teacher Shikabir in Khiva and was distinguished by mastering both religious knowledge and spiritual practices. Beket Ata and Bekbauly Ata maintained a close friendship filled with humor and mutual respect. In some places, they even compared their spiritual powers, holding each other in very high esteem. Due to the geographical characteristics of Mangystau, people respectfully referred to one of them as “the swallow of the lowlands” and the other as “the swallow of the steppe,” honoring both equally.In 2006, on the occasion of the 250th anniversary of Bekbauly Ata, the book “Bekbauly Ata” was published by the “Ush Qiyan” publishing house, compiled by A. Konarbayev. This small book presents legends and narratives about the Ata, his friendship with Beket Ata, his healing abilities, clairvoyance, bone-setting skills, hunting, falconry, and jewelry-making craftsmanship, as well as information about his mosque and descendants.Of course, this book cannot be said to have fully revealed Bekbauly Ata’s life, spiritual qualities, and abilities. Nevertheless, it should be regarded as an initial step, a pioneering effort that opened the path for further studies on Bekbauly Ata, and it is important that this topic continues to be explored in greater depth."},
+            {id: 21, name: "Erjan Haziret", color: "#7AACD2", image: "Erzhan-Haziret.jpg", tags: ["Spiritual figure", "Promotion of Islamic teachings"],details: "Full Name: Ermukhammed (Erjan) Tolegenuly.Hazret Erjan was one of the most prominent religious teachers, scholars, and spiritual leaders in the Mangystau region. He was born in 1887 near Kerel, in what is now the Tupkaragan District (sometimes referred to as the Bozashy Peninsula). His life was devoted to honoring Islam, spreading religious knowledge, and educating people in morality and faith.Education and Work.Erjan Hazret received his religious education at a madrasa in Bukhara and later dedicated himself to teaching and guiding others in spiritual matters. He worked to spread Islamic knowledge in villages and communities, teaching children and youth about faith and ethics.During the Soviet era, he was imprisoned several times (in 1932, 1937, and 1942) for his religious activities and endured harsh conditions for more than ten years.Life and Legacy:Hazret Erjan combined scholarship with spiritual leadership. Beyond teaching religion, he focused on guiding society in moral and ethical behavior. He authored several manuscripts and delivered sermons that provided spiritual direction to the people.Burial and Necropolis:Hazret Erjan passed away in 1966 at the age of 79–80. He was buried in the Shakpak Ata necropolis, which is considered a sacred site by locals. Pilgrims visit his grave to pay respects and offer prayers.“Erjan Hazret” Mosque:In his honor, the “Erjan Hazret” Mosque was built in Aktau. The mosque serves both as a place of worship and as a spiritual and educational center, accommodating large gatherings of people while promoting Hazret Erjan’s legacy.Significance and Honor:Hazret Erjan is regarded as a spiritual leader of Mangystau and is highly respected by the local population. His life and work helped preserve Islam in the Kazakh steppe and continue to inspire young people. His grave and the mosque remain important pilgrimage and cultural sites.Photos and Views:Current photos of the “Erjan Hazret” Mosque and his grave at Shakpak Ata necropolis are available. The mosque serves as both a spiritual center and a memorial in his name in Aktau."},
+        ];
+
+        const sitesGrid = document.querySelector('.sites-grid');
+        sitesData.forEach(site => {
+            const card = document.createElement('div');
+            card.className = 'site-card';
+            card.innerHTML = `
+               <div class="site-image" style="background: url(${site.image});background-position: center;
+    background-size: cover;">
+                    <div class="site-overlay">
+                        <div class="site-number">${site.id}</div>
+                        <h3 style="color:white;font-size:1.8rem;">${site.name}</h3>
+                    </div>
+                </div>
+                <div class="site-content">
+                    <h4>${site.name}</h4>
+                    <p>${getSiteDescription(site.id)}</p>
+                    <div class="site-tags">
+                        ${site.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <button class="btn btn-outline" onclick="showSiteDetails(${site.id})" style="margin-top:1rem;width:100%;border-color:#2A5C82;color:#2A5C82">
+    <i class="fas fa-eye"></i> Research
+</button>
+
+<div class="site-details" id="details-${site.id}" style="display:none;margin-top:1rem;">
+    <p>${site.details}</p>
+</div>
+                </div>
+            `;
+            sitesGrid.appendChild(card);
+        });
+
+        function getSiteDescription(id) {
+            const descriptions = [
+                "The first stop of the journey is spiritual initiation. The heart and mind are purified.",
+                "A symbol of justice and reason. Internal wisdom is determined.",
+                "A place to feel honesty and purity of heart, to check intentions.",
+                "A symbol of firmness and loyalty. Stick to the goal.",
+                "Center of spiritual education and education. Calls for unity.",
+                "Feeling heroic and protective. Last stop.",
+                "A place where religious leadership and heroic qualities intersect.",
+                "A uniquely architectured mosque adorned with Sufi knowledge.",
+                "A supporter of travelers under the open sky.",
+                "‘The Fiery Mountain’ as a tribute to the spirits of the ancestors",
+                "Unique monuments are evidence of legends and tales.The beginning of Sufi teachings.",
+                "The highest form of cultural architecture.An example of unique art.",
+                "A mausoleum of honor with special significance for historical figures.",
+                "The convergence of purity of soul and sincere intention.Respect.",
+                "An important source in the study of past worldviews.",
+                "A clear proof of honoring antiquity",
+                "The authenticity of folk legends",
+                "A natural historical-cultural monument",
+                "This mausoleum is a unique example of traditional architecture",
+                "A mausoleum filled with hidden secrets",
+                "A respected place among the people"
+            ];
+            return descriptions[id-1] || "Sacred place Mangystau.";
+        }
+
+        function showSiteDetails(siteId) {
+            alert(`A detailed page opens: ${sacredSites.find(s => s.id === siteId).name}`);
+            // Здесь будет переход на детальную страницу
+        }
+
+        function update3DViewer(siteId) {
+            const viewer = document.getElementById('model-viewer');
+            viewer.innerHTML = `
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;background:linear-gradient(45deg, #${(siteId*100+1000).toString(16)}, #${(siteId*150+1000).toString(16)});">
+                    <div style="text-align:center;">
+                        <i class="fas fa-monument" style="font-size:4rem;margin-bottom:1rem;"></i><br>
+                        3D model: ${sacredSites.find(s => s.id === siteId).name}<br>
+                        <small style="opacity:0.8;">Use mouse to rotate</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Кнопка исследования
+        document.getElementById('exploreBtn').addEventListener('click', function() {
+            document.getElementById('map').scrollIntoView({behavior: 'smooth'});
+        });
+        function showSiteDetails(id) {
+            const details = document.getElementById(`details-${id}`);
+
+    
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+    } else {
+        details.style.display = 'none';
+     }
+          } 
+        // Инициализация простого 3D сцены (заглушка)
+        function init3DViewer() {
+            // Здесь будет код Three.js для реальных 3D моделей
+            console.log("3D Viewer инициализирован");
+        }
+
+        // Запуск при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            init3DViewer();
+            // Установка первого объекта как активного
+            highlightSiteItem(1);
+            update3DViewer(1);
+        });
+
+        
+    </script>
+
+       <!-- Modal -->
+<div id="siteModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <img id="modalImage" alt="" />
+        <p id="modalText"></p>
+        <div id="modalTags"></div>
+    </div>
+</div>
+<script>
+    function showSiteDetails(id) {
+    const site = sitesData.find(s => s.id === id);
+    if (!site) return;
+
+    document.getElementById("modalTitle").innerText = site.name;
+    document.getElementById("modalImage").src = site.image;
+    document.getElementById("modalText").innerText = site.details;
+
+    document.getElementById("modalTags").innerHTML =
+        site.tags.map(t => `<span>${t}</span>`).join("");
+
+    document.getElementById("siteModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("siteModal").style.display = "none";
+}
+
+// Закрытие по клику вне окна
+window.onclick = function(e) {
+    const modal = document.getElementById("siteModal");
+    if (e.target === modal) modal.style.display = "none";
+};
+
+</script>
+</body>
+</html>
